@@ -1,0 +1,30 @@
+import { useToastMessage } from '../../../../src/ui/ToastProvider.jsx';
+
+export default function Toast() {
+  const message = useToastMessage();
+  if (!message) return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        bottom: 24,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'var(--bl-ink)',
+        color: 'var(--bl-white)',
+        borderRadius: 999,
+        padding: '12px 26px',
+        fontWeight: 700,
+        fontSize: 14,
+        zIndex: 200,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {message}
+    </div>
+  );
+}

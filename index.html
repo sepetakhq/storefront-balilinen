@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  Everything between the markers below is written by the server, per tenant and
+  per route: backend/internal/seo/render.go replaces the whole block. See the
+  root index.html for why it is generic and noindex. Do not delete or rename
+  the markers -- the API logs at ERROR on boot when a bundle lacks them.
+-->
+<!--seo:start-->
+<title>Toko</title>
+<meta name="description" content="">
+<meta name="robots" content="noindex">
+<!--seo:end-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
