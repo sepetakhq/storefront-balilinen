@@ -153,6 +153,7 @@ Enable the method in settings, place an order, drive with the stub webhook.
 | 6.3 | `va` (BCA / Mandiri) | Bank, VA number, copy, amount, instructions |
 | 6.4 | `manual_transfer` (MANUAL_BCA) | Merchant account from config; "I've paid" → awaiting confirmation; second claim disabled; admin confirm-payment → paid |
 | 6.5 | `manual_qris` | Static QR + claim flow |
+| 6.5a | `manual_whatsapp` (MANUAL_WHATSAPP) | Message preview in English, "Open WhatsApp →" is a `wa.me/<number>?text=` link with the order inside, no unique code on the amount, "I've paid" → held; admin confirm-payment → paid |
 | 6.6 | `redirect` | Opens gateway URL same tab; return lands on order page |
 | 6.7 | Webhook `paid` | Panel flips to paid without reload; timeline gains Paid; `status_label` from API |
 | 6.8 | Webhook `expired` | Dead state ("Payment couldn’t be opened"); "Try payment again" reopens the **same** method with a fresh reference |

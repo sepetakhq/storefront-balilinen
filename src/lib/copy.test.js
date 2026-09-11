@@ -9,13 +9,16 @@ import {
   orderNote,
   overlayLabel,
   pageName,
+  PAY_TITLES,
   stockNote,
   terminalNote,
   validateContact,
   validatePhone,
   voucherNotes,
+  WA_MESSAGE,
   windowNote,
 } from './copy.js';
+import { orderMessage } from '../../../../src/lib/whatsapp.js';
 
 describe('availability copy', () => {
   it('names each closed state the way the card overlay does', () => {
@@ -52,6 +55,16 @@ describe('stock copy', () => {
       'In stock (40 pcs) — ships from Denpasar in 1–2 business days',
     );
     expect(stockNote(null)).toBeNull();
+  });
+
+  // Not counted: buyable at any number, so the number is never quoted and
+  // the line never turns terra. The shipping promise still rides along.
+  it('says in stock for an unlimited product, whatever the counter reads', () => {
+    expect(stockNote({ unlimited_stock: true, stock: 0 })).toEqual({ text: 'In stock', tone: 'green' });
+    expect(stockNote({ unlimited_stock: true, stock: 42 }).text).toBe('In stock');
+    expect(stockNote({ unlimited_stock: true, stock: 0 }, 'Denpasar').text).toBe(
+      'In stock — ships from Denpasar in 1–2 business days',
+    );
   });
 
   it('gives every cart status a sentence, and a plain line none', () => {
@@ -96,7 +109,12 @@ describe('contact copy', () => {
 describe('order copy', () => {
   it('only mentions released stock when something was reserved', () => {
     expect(terminalNote({ status: 'expired', lines: [{ preorder: true }] })).not.toMatch(/stock/);
+    expect(terminalNote({ status: 'expired', lines: [{ unlimited_stock: true }] })).not.toMatch(/stock/);
     expect(terminalNote({ status: 'expired', lines: [{ preorder: false }] })).toMatch(/stock has been released/);
+    // One counted line is enough: something really was put back.
+    expect(
+      terminalNote({ status: 'expired', lines: [{ unlimited_stock: true }, { preorder: false }] }),
+    ).toMatch(/stock has been released/);
     expect(terminalNote({ status: 'cancelled', lines: [] })).toBe('This order was cancelled.');
     expect(terminalNote({ status: 'processing' })).toBeNull();
   });
@@ -125,5 +143,37 @@ describe('page names', () => {
     expect(pageName('/produk/bath-towel', { product: { name: 'Bath Towel' } })).toBe('Bath Towel');
     expect(pageName('/pesanan/ABC')).toBe('Order');
     expect(pageName('/nothing')).toBe('');
+  });
+});
+
+describe('WhatsApp order message', () => {
+  it('titles the panel and reads as one English message', () => {
+    expect(PAY_TITLES.manual_whatsapp).toBe('Send your order on WhatsApp');
+    const order = {
+      number: 'BL-260912-0003',
+      customer_name: 'Made',
+      city: 'Denpasar',
+      courier_code: 'jne',
+      subtotal: 450000,
+      shipping_cost: 25000,
+      shipping_discount: 25000,
+      total: 450000,
+      lines: [{ qty: 1, name: 'Bed Sheet Set Plain White — Queen TC-200' }],
+    };
+    expect(orderMessage(order, 'https://balilinen.test/pesanan/tok', WA_MESSAGE)).toBe(
+      [
+        'Hi, I’d like to order #BL-260912-0003',
+        '',
+        '- 1× Bed Sheet Set Plain White — Queen TC-200',
+        '',
+        'Subtotal: Rp 450.000',
+        'Shipping: Rp 25.000 (jne)',
+        'Shipping discount: -Rp 25.000',
+        'Total: Rp 450.000',
+        '',
+        'For Made, Denpasar',
+        'Order details: https://balilinen.test/pesanan/tok',
+      ].join('\n'),
+    );
   });
 });

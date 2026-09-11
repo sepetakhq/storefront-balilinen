@@ -87,6 +87,8 @@ function ProductView({ product, onOpen }) {
   const main = gallery[Math.min(active, gallery.length - 1)];
 
   const overlay = overlayLabel(product);
+  // Never null for a product (copy.js keeps that contract, including for
+  // unlimited stock), so .tone below is read unguarded.
   const stock = stockNote(product, brand.origin_city);
   const saleWindow = windowNote(product);
   const label = buyLabel(product);

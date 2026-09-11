@@ -113,6 +113,14 @@ export function stockNote(product, originCity) {
       tone: 'green',
     };
   }
+  // Not counted: no number to quote, and the shipping line still applies.
+  // Never null for a product -- ProductRoute reads .tone unguarded.
+  if (product.unlimited_stock) {
+    return {
+      text: `In stock${originCity ? ` — ships from ${originCity} in 1–2 business days` : ''}`,
+      tone: 'green',
+    };
+  }
   const stock = product.stock ?? 0;
   if (stock <= 0) return { text: 'Out of stock — restocking soon', tone: 'terra' };
   if (stock < 10) return { text: `Only ${stock} left — don’t miss out`, tone: 'gold' };
@@ -293,10 +301,13 @@ export function voucherLabel(draft, fallback) {
 /** Why a terminal order ended, or null while it is alive. */
 export function terminalNote(order) {
   if (order?.status === 'expired') {
-    const allPreorder = (order.lines ?? []).length > 0 && order.lines.every((l) => l.preorder);
+    // Only lines that reserved stock had any to release: a pre-order is
+    // made after payment, an unlimited product is not counted.
+    const nothingReserved =
+      (order.lines ?? []).length > 0 && order.lines.every((l) => l.preorder || l.unlimited_stock);
     return (
       'This order expired because the payment didn’t arrive in time.' +
-      (allPreorder ? '' : ' The stock has been released.')
+      (nothingReserved ? '' : ' The stock has been released.')
     );
   }
   if (order?.status === 'cancelled') return 'This order was cancelled.';
@@ -317,6 +328,22 @@ export const PAY_TITLES = {
   redirect: 'Continue to the payment page',
   manual_transfer: 'Pay by bank transfer',
   manual_qris: 'Pay with our shop QRIS',
+  manual_whatsapp: 'Send your order on WhatsApp',
+};
+
+/**
+ * The words in the WhatsApp order message. The layout is src/lib/whatsapp.js's
+ * (orderMessage); this is the English set it is called with here.
+ */
+export const WA_MESSAGE = {
+  greeting: (number) => `Hi, I’d like to order #${number}`,
+  subtotal: 'Subtotal',
+  discount: 'Discount',
+  shipping: 'Shipping',
+  shippingDiscount: 'Shipping discount',
+  total: 'Total',
+  onBehalf: (name, city) => `For ${name}${city ? `, ${city}` : ''}`,
+  detail: 'Order details',
 };
 
 // --- document title ---------------------------------------------------------

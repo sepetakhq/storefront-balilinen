@@ -94,6 +94,33 @@ describe('PaymentPanel renders every kind the backend can emit', () => {
     expect(screen.getByText(/carries no amount/)).toBeTruthy();
   });
 
+  it('manual_whatsapp: opens a chat with the order already written, and offers the claim', () => {
+    const onClaim = vi.fn();
+    panel(
+      { kind: 'manual_whatsapp', method: 'MANUAL_WHATSAPP', amount: 350000, status: 'pending', manual_whatsapp_phone: '628110000000' },
+      { onClaim },
+    );
+    expect(screen.getByText(/Send your order on WhatsApp/)).toBeTruthy();
+    const link = screen.getByText(/Open WhatsApp/).closest('a');
+    expect(link.getAttribute('href')).toMatch(/^https:\/\/wa\.me\/628110000000\?text=/);
+    expect(decodeURIComponent(link.getAttribute('href'))).toContain('#BL-260911-0001');
+    // The buyer reads what they are about to send, in English.
+    expect(screen.getByText(/Hi, I’d like to order #BL-260911-0001/)).toBeTruthy();
+    // No account chrome: nothing to copy.
+    expect(screen.queryByRole('button', { name: /^Copy$/ })).toBeNull();
+    expect(screen.queryByText(DEAD_END)).toBeNull();
+    // The claim is worded for a chat, not a transfer.
+    expect(screen.getByText(/Paid as agreed on WhatsApp/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /I’ve paid/ }));
+    expect(onClaim).toHaveBeenCalled();
+  });
+
+  it('manual_whatsapp: reports a missing number instead of a blank panel', () => {
+    panel({ kind: 'manual_whatsapp', method: 'MANUAL_WHATSAPP', amount: 350000, status: 'pending' });
+    expect(screen.getByText(/WhatsApp number not available/)).toBeTruthy();
+    expect(screen.queryByText(/Open WhatsApp/)).toBeNull();
+  });
+
   it('dead intent: the order is still payable and a retry is offered', () => {
     const onRetry = vi.fn();
     panel(null, { onRetry });

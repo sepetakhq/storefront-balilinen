@@ -25,7 +25,8 @@ import {
   splitUniqueCode,
 } from '../../../../src/lib/payment.js';
 import { useToast } from '../../../../src/ui/ToastProvider.jsx';
-import { PAY_TITLES, fmtDate, fmtDateTime, terminalNote } from '../lib/copy.js';
+import { orderMessage, waLink } from '../../../../src/lib/whatsapp.js';
+import { PAY_TITLES, WA_MESSAGE, fmtDate, fmtDateTime, terminalNote } from '../lib/copy.js';
 
 const panel = { marginTop: 26, background: 'var(--bl-white)', border: '1px solid var(--bl-line)', borderRadius: 18 };
 
@@ -343,6 +344,12 @@ export function PaymentPanel({ order, payment, onRefresh, refreshing, onRetry, r
     } else {
       block = <TestNote title="QRIS not available" body="The shop hasn’t uploaded its QRIS for this method yet. Your order is saved — please contact us." extra={whatsapp} />;
     }
+  } else if (kind === 'manual_whatsapp') {
+    block = payment.manual_whatsapp_phone ? (
+      <WhatsAppBlock phone={payment.manual_whatsapp_phone} order={order} />
+    ) : (
+      <TestNote title="WhatsApp number not available" body="The shop hasn’t set the number this order goes to. Your order is saved — please contact us." extra={whatsapp} />
+    );
   }
 
   return (
@@ -376,7 +383,7 @@ export function PaymentPanel({ order, payment, onRefresh, refreshing, onRetry, r
           </div>
         ) : null}
       </div>
-      {manual ? <ManualClaim order={order} onClaim={onClaim} claiming={claiming} claimError={claimError} canClaim={canClaimPayment(order, payment)} /> : null}
+      {manual ? <ManualClaim order={order} kind={kind} onClaim={onClaim} claiming={claiming} claimError={claimError} canClaim={canClaimPayment(order, payment)} /> : null}
       <div className="bl-muted" style={{ padding: '14px 26px', borderTop: '1px solid var(--bl-sand-2)', background: 'var(--bl-cream)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: 12.5 }}>
         This page updates by itself once the payment lands.
         <button type="button" onClick={onRefresh} className="bl-link" style={{ fontSize: 13 }}>
@@ -465,6 +472,33 @@ function QrisNote({ config }) {
   );
 }
 
+/**
+ * The order handed to the shop as the first message of a chat.
+ *
+ * The message is shown in full before the button because the buyer sends it
+ * under their own name: nothing in it should surprise them. The link inside
+ * it is this page's own URL, so the shop lands where the buyer is looking.
+ */
+function WhatsAppBlock({ phone, order }) {
+  const message = orderMessage(order, typeof window === 'undefined' ? '' : window.location.href, WA_MESSAGE);
+  return (
+    <div style={{ marginTop: 22 }}>
+      <div className="bl-muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+        We’ll agree shipping and payment in the chat.
+      </div>
+      <div className="bl-note info" style={{ marginTop: 10, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        {message}
+      </div>
+      <a href={waLink(phone, message)} target="_blank" rel="noopener noreferrer" className="bl-btn primary sm" style={{ marginTop: 14 }}>
+        Open WhatsApp →
+      </a>
+      <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 10, lineHeight: 1.5 }}>
+        The message is already written — just send it.
+      </div>
+    </div>
+  );
+}
+
 /** A method whose instructions cannot be followed: the stub gateway, or a missing account. */
 function TestNote({ title, body, raw, extra }) {
   return (
@@ -515,7 +549,12 @@ function PaymentUnavailable({ order, brand, onRetry, retrying, retryError }) {
 }
 
 /** "I've paid", and what it turns into. A manual payment produces no callback. */
-function ManualClaim({ order, onClaim, claiming, claimError, canClaim }) {
+function ManualClaim({ order, kind, onClaim, claiming, claimError, canClaim }) {
+  // A chat has no transfer to have "already" made; the amount is agreed there.
+  const prompt =
+    kind === 'manual_whatsapp'
+      ? 'Paid as agreed on WhatsApp? Let us know and we’ll hold the order while we check.'
+      : 'Already transferred? Let us know and we’ll hold the order while we check.';
   if (order.buyer_claimed_at) {
     return (
       <div style={{ padding: '14px 26px', borderTop: '1px solid var(--bl-sand-2)', fontSize: 13.5, color: 'var(--bl-green)' }}>
@@ -527,7 +566,7 @@ function ManualClaim({ order, onClaim, claiming, claimError, canClaim }) {
   return (
     <div style={{ padding: '16px 26px', borderTop: '1px solid var(--bl-sand-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
       <div className="bl-muted" style={{ fontSize: 13.5 }}>
-        Already transferred? Let us know and we’ll hold the order while we check.
+        {prompt}
         {claimError ? (
           <span role="alert" style={{ display: 'block', color: 'var(--bl-terra-dark)', marginTop: 4 }}>
             {claimError.message}
