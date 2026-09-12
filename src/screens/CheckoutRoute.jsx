@@ -13,6 +13,7 @@ import { useCartLines } from '../../../../src/cart/useCartLines.js';
 import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
 import { createDraft, sendCheckoutCode, verifyCheckoutCode } from '../../../../src/api/endpoints.js';
 import { qk } from '../../../../src/api/queryKeys.js';
+import { lineKey } from '../../../../src/lib/variants.js';
 import { fmt } from '../../../../src/shared/format.js';
 import { confirmStep, estimatePaymentFee, estimateShipping, methodFits } from '../../../../src/lib/checkout.js';
 import { CHANNEL_WHATSAPP, normalizeContact, normalizePhone } from '../../../../src/lib/contact.js';
@@ -77,11 +78,16 @@ function Checkout({ onPlaced }) {
 
   const cartPrices = useMemo(() => {
     const m = new Map();
-    for (const l of lines) if (l.product) m.set(l.product.id, l.product.price);
+    for (const l of lines) if (l.product) m.set(l.key, l.product.price);
     return m;
   }, [lines]);
 
-  const cartItems = useMemo(() => cart.items.map((it) => ({ product_id: it.productId, qty: it.qty })), [cart.items]);
+  // variant_id rides along only when the line names one, so a cart of plain
+  // products sends exactly the body it always did.
+  const cartItems = useMemo(
+    () => cart.items.map((it) => ({ product_id: it.productId, qty: it.qty, ...(it.variantId ? { variant_id: it.variantId } : {}) })),
+    [cart.items],
+  );
 
   const draftMutation = useMutation({
     mutationFn: () =>
@@ -447,10 +453,11 @@ function Checkout({ onPlaced }) {
             {lines
               .filter((l) => l.product)
               .map((l) => (
-                <div key={l.item.productId} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div key={l.key} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <Img src={l.product.image} srcSet={l.product.image_srcset} sizes={SIZES.summaryLine} alt="" ratio="1/1" radius={8} style={{ width: 44, flex: 'none' }} />
                   <div style={{ flex: 1, fontSize: 12.5, lineHeight: 1.35 }}>
                     <span style={{ fontWeight: 700 }}>{l.item.qty}×</span> {l.product.name}
+                    {l.label ? <span className="bl-muted"> · {l.label}</span> : null}
                   </div>
                   <div style={{ fontSize: 12.5, fontWeight: 700 }}>{fmt(l.lineTotal)}</div>
                 </div>
@@ -506,7 +513,7 @@ function Review({ draft, cartPrices, courier, method, contactNoun, error, otp, o
   const liveCode = step === 'reopen';
   const skipsCode = step === 'place';
   const changed = draft.lines.filter((l) => {
-    const before = cartPrices.get(l.product_id);
+    const before = cartPrices.get(lineKey(l));
     return before !== undefined && before !== l.unit_price;
   });
   const netShip = draft.shipping_cost - draft.shipping_discount;
@@ -522,8 +529,8 @@ function Review({ draft, cartPrices, courier, method, contactNoun, error, otp, o
             <div role="status" className="bl-note warn" style={{ padding: '14px 18px' }}>
               <div style={{ fontWeight: 700 }}>Some prices changed since you added them</div>
               {changed.map((l) => (
-                <div key={l.product_id}>
-                  {l.name}: <s>{fmt(cartPrices.get(l.product_id))}</s> → <b>{fmt(l.unit_price)}</b>
+                <div key={lineKey(l)}>
+                  {l.name}{l.variant_label ? ` (${l.variant_label})` : ''}: <s>{fmt(cartPrices.get(lineKey(l)))}</s> → <b>{fmt(l.unit_price)}</b>
                 </div>
               ))}
             </div>
@@ -533,10 +540,11 @@ function Review({ draft, cartPrices, courier, method, contactNoun, error, otp, o
             <div className="bl-card-title">Review your order</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {draft.lines.map((l) => (
-                <div key={l.product_id} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div key={lineKey(l)} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                   <Img src={l.image} srcSet={l.image_srcset} sizes={SIZES.summaryLine} alt="" ratio="1/1" radius={10} style={{ width: 56, flex: 'none' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{l.name}</div>
+                    {l.variant_label ? <div style={{ fontSize: 12.5, marginTop: 2 }}>{l.variant_label}</div> : null}
                     <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 3 }}>
                       {l.qty} × {fmt(l.unit_price)}
                       {l.promotion_name ? <span style={{ color: 'var(--bl-terra)', fontWeight: 700 }}> · {l.promotion_name}</span> : null}

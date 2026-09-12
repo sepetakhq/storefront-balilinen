@@ -5,10 +5,10 @@ import { EmptyState, InlineError, Skeleton } from '../ui/states.jsx';
 import { useCart, MAX_QTY } from '../../../../src/cart/CartProvider.jsx';
 import { useCartLines } from '../../../../src/cart/useCartLines.js';
 import { fmt } from '../../../../src/shared/format.js';
-import { blockerNotice, cartLineNote, orderNote } from '../lib/copy.js';
+import { VARIANT_GONE, blockerNotice, cartLineNote, orderNote } from '../lib/copy.js';
 
 const TONE = { green: 'var(--bl-green)', gold: 'var(--bl-gold)', terra: 'var(--bl-terra-dark)', muted: 'var(--bl-muted)' };
-const DIMMED = ['soldout', 'scheduled', 'ended', 'gone'];
+const DIMMED = ['soldout', 'scheduled', 'ended', 'gone', 'variant_required'];
 
 export default function CartRoute() {
   const cart = useCart();
@@ -49,7 +49,7 @@ export default function CartRoute() {
         <div className="bl-two">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {lines.map((line) => (
-              <CartLine key={line.item.productId} line={line} onQty={cart.setQty} onRemove={cart.remove} />
+              <CartLine key={line.key} line={line} onQty={cart.setQty} onRemove={cart.remove} />
             ))}
           </div>
 
@@ -99,8 +99,8 @@ export default function CartRoute() {
 }
 
 function CartLine({ line, onQty, onRemove }) {
-  const { item, product, status, error, refetch, available } = line;
-  const remove = () => onRemove(item.productId);
+  const { item, key, product, label, status, error, refetch, available } = line;
+  const remove = () => onRemove(key);
 
   if (status === 'loading') {
     return (
@@ -122,7 +122,9 @@ function CartLine({ line, onQty, onRemove }) {
     );
   }
 
-  const note = cartLineNote(status, product, available);
+  // A line whose variant is gone still has its product: say so, rather than
+  // "no longer sold" about a product that is very much for sale.
+  const note = status === 'gone' && product ? { text: VARIANT_GONE, tone: 'terra' } : cartLineNote(status, product, available);
   const dimmed = DIMMED.includes(status);
   const name = product?.name ?? item.slug;
   const price = product?.price ?? 0;
@@ -141,14 +143,15 @@ function CartLine({ line, onQty, onRemove }) {
         ) : (
           <span style={{ fontWeight: 700, fontSize: 14.5, color: 'var(--bl-muted)' }}>{name}</span>
         )}
-        {product ? (
+        {label ? <div style={{ fontSize: 13, color: 'var(--bl-ink)', marginTop: 2 }}>{label}</div> : null}
+        {product && status !== 'variant_required' ? (
           <div style={{ fontSize: 13, color: 'var(--bl-green)', fontWeight: 700, marginTop: 4 }}>{fmt(price)} each</div>
         ) : null}
         {note ? (
           <div style={{ fontSize: 12.5, marginTop: 5, color: TONE[note.tone] }}>
             {note.text}{' '}
             {status === 'overstock' ? (
-              <button type="button" onClick={() => onQty(item.productId, available)} className="bl-link" style={{ fontSize: 12.5, textDecoration: 'underline' }}>
+              <button type="button" onClick={() => onQty(key, available)} className="bl-link" style={{ fontSize: 12.5, textDecoration: 'underline' }}>
                 Adjust to {available}
               </button>
             ) : null}
@@ -158,7 +161,7 @@ function CartLine({ line, onQty, onRemove }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
         {!dimmed ? (
           <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--bl-line)', borderRadius: 999 }}>
-            <button type="button" aria-label="Decrease quantity" disabled={item.qty <= 1} onClick={() => onQty(item.productId, item.qty - 1)} style={qtyButton}>
+            <button type="button" aria-label="Decrease quantity" disabled={item.qty <= 1} onClick={() => onQty(key, item.qty - 1)} style={qtyButton}>
               −
             </button>
             <span style={{ minWidth: 22, textAlign: 'center', fontWeight: 700, fontSize: 14 }}>{item.qty}</span>
@@ -166,7 +169,7 @@ function CartLine({ line, onQty, onRemove }) {
               type="button"
               aria-label="Increase quantity"
               disabled={item.qty >= Math.min(MAX_QTY, available)}
-              onClick={() => onQty(item.productId, item.qty + 1)}
+              onClick={() => onQty(key, item.qty + 1)}
               style={qtyButton}
             >
               +

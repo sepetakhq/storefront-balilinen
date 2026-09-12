@@ -12,7 +12,7 @@ import { OptionTile } from './OptionTile.jsx';
  * price, is what checkout submits.
  */
 export default function ShippingRates({ destination, items, selected, onSelect, onRetry }) {
-  const cartKey = items.map((i) => `${i.product_id}:${i.qty}`).sort().join('|');
+  const cartKey = items.map((i) => `${i.product_id}:${i.variant_id ?? ''}:${i.qty}`).sort().join('|');
 
   const rates = useQuery({
     queryKey: qk.rates(destination?.ref ?? '', cartKey),

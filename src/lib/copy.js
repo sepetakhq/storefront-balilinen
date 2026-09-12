@@ -160,6 +160,8 @@ export function cartLineNote(status, product, available) {
       return { text: 'Sale has ended', tone: 'terra' };
     case 'soldout':
       return { text: 'Sold out', tone: 'terra' };
+    case 'variant_required':
+      return { text: 'This product now comes in variants. Pick one, then remove this line.', tone: 'gold' };
     case 'overstock':
       return { text: `Only ${available} left.`, tone: 'gold' };
     default: {
@@ -176,8 +178,29 @@ export function blockerNotice(statuses) {
   if (blocking.every((s) => s === SCHEDULED)) {
     return 'Something in your cart isn’t open for sale yet. Keep it here and come back when the sale starts, or remove it to check out now.';
   }
+  if (blocking.every((s) => s === 'variant_required')) {
+    return 'Something in your cart needs a variant picked. Open the product and choose one.';
+  }
   return 'Something in your cart is no longer available. Remove it before continuing to checkout.';
 }
+
+// --- variants ---------------------------------------------------------------
+
+/** The heading above one row of variant pills. */
+export function chooseAxis(axis, picked) {
+  return picked ? `Choose ${axis}: ${picked}` : `Choose ${axis}`;
+}
+
+/** What a greyed-out pill says to a screen reader. */
+export function pillState(value, { exists, soldOut }) {
+  if (soldOut) return `${value} (sold out)`;
+  if (!exists) return `${value} (not available)`;
+  return value;
+}
+
+export const CHOOSE_VARIANT = 'Choose a variant';
+export const FROM = 'from';
+export const VARIANT_GONE = 'This variant is no longer sold';
 
 // --- campaigns --------------------------------------------------------------
 

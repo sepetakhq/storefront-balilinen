@@ -12,7 +12,16 @@ import { isImminent, isScheduled, msUntilOpen } from '../../../../src/lib/availa
 import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
 import { useToast } from '../../../../src/ui/ToastProvider.jsx';
 import { fmt, fmtClock, paragraphs } from '../../../../src/shared/format.js';
-import { buyLabel, overlayLabel, stockNote, windowNote } from '../lib/copy.js';
+import { CHOOSE_VARIANT, FROM, buyLabel, chooseAxis, overlayLabel, pillState, stockNote, windowNote } from '../lib/copy.js';
+import {
+  availableValues,
+  galleryFor,
+  initialSelection,
+  isPriceRange,
+  matchVariant,
+  select,
+  withVariant,
+} from '../../../../src/lib/variants.js';
 
 const TONE = { green: 'var(--bl-green)', gold: 'var(--bl-gold)', terra: 'var(--bl-terra-dark)', muted: 'var(--bl-muted)' };
 
@@ -81,19 +90,33 @@ function ProductView({ product, onOpen }) {
   const [openTab, setOpenTab] = useState('desc');
   const [broken, setBroken] = useState(() => new Set());
 
+  // Which value is picked per axis; `variant` is the one combination the
+  // picks name, or null while one is missing. Decisions live in
+  // src/lib/variants.js, shared with the Indonesian storefront.
+  const [selected, setSelected] = useState(() => initialSelection(product));
+  const variant = matchVariant(product.variants, selected);
+  const sellable = withVariant(product, variant);
+  const needsChoice = Boolean(product.has_variants) && !variant;
+  const pick = (axis, value) => {
+    setSelected((cur) => select(product, cur, axis, value));
+    setActive(0);
+    setQty(1);
+  };
+
   const all = product.images?.length ? product.images : [{ url: product.image, srcset: product.image_srcset, alt: product.name }];
-  const images = all.filter((im) => !broken.has(im.url));
+  const images = galleryFor(all, variant).filter((im) => !broken.has(im.url));
   const gallery = images.length ? images : all.slice(0, 1);
   const main = gallery[Math.min(active, gallery.length - 1)];
 
-  const overlay = overlayLabel(product);
+  const overlay = overlayLabel(sellable);
   // Never null for a product (copy.js keeps that contract, including for
-  // unlimited stock), so .tone below is read unguarded.
-  const stock = stockNote(product, brand.origin_city);
+  // unlimited stock), so .tone below is read unguarded. Hidden until a
+  // variant is picked: the picker is where the stock answer lives.
+  const stock = stockNote(sellable, brand.origin_city);
   const saleWindow = windowNote(product);
-  const label = buyLabel(product);
-  const blocked = isSoldOut(product) || Boolean(label);
-  const max = maxQty(product);
+  const label = buyLabel(sellable);
+  const blocked = isSoldOut(sellable) || Boolean(label);
+  const max = maxQty(sellable);
   const countdown = useOpeningCountdown(product, onOpen);
   const days = leadDays(product);
 
@@ -118,7 +141,7 @@ function ProductView({ product, onOpen }) {
   ].filter((t) => t.paras.length > 0 || t.spec);
 
   const add = () => {
-    cart.add(product, qty);
+    cart.add(product, qty, variant?.id ?? null);
     showToast('Added to cart ✓');
     navigate('/keranjang');
   };
@@ -181,17 +204,23 @@ function ProductView({ product, onOpen }) {
             {product.name}
           </h1>
           <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', marginTop: 16, flexWrap: 'wrap' }}>
-            {product.on_sale ? <span style={{ fontSize: 16, color: 'var(--bl-faint)', textDecoration: 'line-through' }}>{fmt(product.compare_at_price)}</span> : null}
-            <span style={{ fontSize: 27, fontWeight: 800, color: 'var(--bl-green)' }}>{fmt(product.price)}</span>
-            {product.on_sale && product.badge ? <span className="bl-badge" style={{ fontSize: 11 }}>{product.badge}</span> : null}
+            {needsChoice && isPriceRange(product) ? <span className="bl-muted" style={{ fontSize: 15, fontWeight: 600 }}>{FROM}</span> : null}
+            {sellable.on_sale ? <span style={{ fontSize: 16, color: 'var(--bl-faint)', textDecoration: 'line-through' }}>{fmt(sellable.compare_at_price)}</span> : null}
+            <span style={{ fontSize: 27, fontWeight: 800, color: 'var(--bl-green)' }}>
+              {fmt(needsChoice ? product.price : sellable.price)}
+            </span>
+            {sellable.on_sale && sellable.badge ? <span className="bl-badge" style={{ fontSize: 11 }}>{sellable.badge}</span> : null}
             {product.preorder ? <span className="bl-badge preorder" style={{ marginLeft: 0, fontSize: 11 }}>PRE-ORDER</span> : null}
           </div>
           {/* The description lives in the details panel below, as designed;
               up here it read twice on every product. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 13.5, color: TONE[stock.tone] }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'currentColor', flex: 'none' }} />
-            {stock.text}
-          </div>
+          {product.has_variants ? <VariantPicker product={product} selected={selected} onPick={pick} /> : null}
+          {!needsChoice ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 13.5, color: TONE[stock.tone] }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'currentColor', flex: 'none' }} />
+              {stock.text}
+            </div>
+          ) : null}
           {saleWindow ? (
             <div style={{ marginTop: 8, fontSize: 13.5, color: TONE[saleWindow.tone] }}>
               {saleWindow.text}
@@ -207,7 +236,11 @@ function ProductView({ product, onOpen }) {
           <div className="bl-rule" style={{ margin: '24px 0' }} />
 
           <div style={{ display: 'flex', gap: 12, alignItems: 'stretch', flexWrap: 'wrap' }}>
-            {!blocked ? (
+            {needsChoice ? (
+              <button type="button" disabled className="bl-btn disabled-look" style={{ flex: 1, height: 48, padding: '0 28px' }}>
+                {CHOOSE_VARIANT}
+              </button>
+            ) : !blocked ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid var(--bl-line)', borderRadius: 999, background: 'var(--bl-white)' }}>
                   <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label="Decrease quantity" style={stepper}>
@@ -219,7 +252,7 @@ function ProductView({ product, onOpen }) {
                   </button>
                 </div>
                 <button type="button" onClick={add} className="bl-btn primary" style={{ flex: 1, minWidth: 220, height: 48, padding: '0 28px' }}>
-                  Add to cart — {fmt(product.price * qty)}
+                  Add to cart — {fmt(sellable.price * qty)}
                 </button>
               </>
             ) : (
@@ -320,5 +353,52 @@ function ProductSkeleton() {
         </div>
       </div>
     </main>
+  );
+}
+
+/**
+ * One row of pills per axis, the Bali Linen way: same decisions as the
+ * Indonesian storefront (src/lib/variants.js), rendered as .bl-tile pills. A
+ * combination the shop does not sell is dashed, a sold-out one struck through.
+ */
+function VariantPicker({ product, selected, onPick }) {
+  return (
+    <div style={{ display: 'grid', gap: 16, marginTop: 20 }}>
+      {product.options.map((axis) => (
+        <div key={axis.name} role="group" aria-label={chooseAxis(axis.name)}>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+            {chooseAxis(axis.name, selected[axis.name])}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {availableValues(product, axis.name, selected).map((v) => {
+              const on = selected[axis.name] === v.value;
+              const off = !v.exists || v.soldOut;
+              return (
+                <button
+                  key={v.value}
+                  type="button"
+                  className="bl-tile"
+                  onClick={() => onPick(axis.name, v.value)}
+                  disabled={off}
+                  aria-pressed={on}
+                  aria-label={pillState(v.value, v)}
+                  style={{
+                    width: 'auto',
+                    borderRadius: 999,
+                    padding: '9px 16px',
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    borderStyle: v.exists ? 'solid' : 'dashed',
+                    textDecoration: v.soldOut ? 'line-through' : 'none',
+                  }}
+                >
+                  {v.value}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

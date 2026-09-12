@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 
 import { Img, SIZES } from '../ui/Img.jsx';
 import { overlayLabel } from '../lib/copy.js';
+import { isPriceRange } from '../../../../src/lib/variants.js';
+import { FROM } from '../lib/copy.js';
 import { fmt } from '../../../../src/shared/format.js';
 
 /**
@@ -49,7 +51,10 @@ export default function ProductCard({ p, compact = false, priority = false, imag
         </div>
         <div className="price">
           {!compact && p.on_sale ? <span className="was">{fmt(p.compare_at_price)}</span> : null}
-          <span className="now">{fmt(p.price)}</span>
+          <span className="now">
+            {isPriceRange(p) ? <span className="bl-muted" style={{ fontWeight: 500, fontSize: '0.8em', marginRight: 4 }}>{FROM}</span> : null}
+            {fmt(p.price)}
+          </span>
         </div>
       </div>
     </Link>

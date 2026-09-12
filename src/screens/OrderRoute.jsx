@@ -176,6 +176,7 @@ export default function OrderRoute() {
               <Img src={l.image} srcSet={l.image_srcset} sizes={SIZES.summaryLine} alt="" ratio="1/1" radius={10} style={{ width: 56, flex: 'none' }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{l.name}</div>
+                {l.variant_label ? <div style={{ fontSize: 12.5, marginTop: 2 }}>{l.variant_label}</div> : null}
                 <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 3 }}>
                   {l.qty} × {fmt(l.unit_price)}
                   {l.preorder ? ' · Pre-order' : ''}

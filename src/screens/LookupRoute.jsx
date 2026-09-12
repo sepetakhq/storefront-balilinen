@@ -248,7 +248,7 @@ function LookupResults({ orders }) {
             </span>
           </div>
           <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 6 }}>
-            {(o.lines ?? []).map((l) => `${l.name} ×${l.qty}`).join(', ')}
+            {(o.lines ?? []).map((l) => `${l.name}${l.variant_label ? ` (${l.variant_label})` : ''} ×${l.qty}`).join(', ')}
           </div>
           {o.awb ? (
             <div style={{ fontSize: 13, marginTop: 6 }}>

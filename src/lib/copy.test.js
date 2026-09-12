@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   blockerNotice,
+  chooseAxis,
+  pillState,
   buyLabel,
   cartLineNote,
   fmtDateTime,
@@ -175,5 +177,22 @@ describe('WhatsApp order message', () => {
         'Order details: https://balilinen.test/pesanan/tok',
       ].join('\n'),
     );
+  });
+});
+
+describe('variants', () => {
+  it('names the axis and the pick', () => {
+    expect(chooseAxis('Size')).toBe('Choose Size');
+    expect(chooseAxis('Size', '70×140 cm')).toBe('Choose Size: 70×140 cm');
+  });
+  it('tells a screen reader why a pill is greyed out', () => {
+    expect(pillState('Sand', { exists: true, soldOut: true })).toBe('Sand (sold out)');
+    expect(pillState('Sand', { exists: false, soldOut: false })).toBe('Sand (not available)');
+    expect(pillState('Sand', { exists: true, soldOut: false })).toBe('Sand');
+  });
+  it('asks for the choice, not the deletion, when that is all that blocks', () => {
+    expect(blockerNotice(['ok', 'variant_required'])).toMatch(/choose one/);
+    expect(blockerNotice(['variant_required', 'soldout'])).toMatch(/Remove it/);
+    expect(cartLineNote('variant_required', {}, 0).text).toMatch(/Pick one/);
   });
 });
