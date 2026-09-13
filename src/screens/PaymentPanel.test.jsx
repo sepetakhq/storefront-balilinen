@@ -42,12 +42,15 @@ describe('PaymentPanel renders every kind the backend can emit', () => {
     panel({ kind: 'va', method: 'BCA', amount: 350000, va_bank: 'BCA', va_number: '31086616057511859904943' });
     expect(screen.getByText(/31086616057511859904943/)).toBeTruthy();
     expect(screen.getByText(/Pay by virtual account/)).toBeTruthy();
+    expect(screen.getByText(/a\/n BALI LINEN/)).toBeTruthy();
     expect(screen.queryByText(DEAD_END)).toBeNull();
   });
 
   it('qr: encodes an EMVCo payload rather than refusing it', () => {
     panel({ kind: 'qr', method: 'QRIS', amount: 350000, qr_payload: emvco });
     expect(screen.getByText(/Scan with any bank/)).toBeTruthy();
+    expect(screen.getByText('BALI LINEN')).toBeTruthy();
+    expect(screen.getByText(/NMID ID10269876543/)).toBeTruthy();
     expect(screen.queryByText(DEAD_END)).toBeNull();
   });
 
