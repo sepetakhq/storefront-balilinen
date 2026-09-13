@@ -15,7 +15,7 @@ import { createDraft, sendCheckoutCode, verifyCheckoutCode } from '../../../../s
 import { qk } from '../../../../src/api/queryKeys.js';
 import { lineKey } from '../../../../src/lib/variants.js';
 import { fmt } from '../../../../src/shared/format.js';
-import { confirmStep, estimatePaymentFee, estimateShipping, methodFits } from '../../../../src/lib/checkout.js';
+import { confirmStep, estimatePaymentFee, estimateShipping, methodFits, storeNotReady } from '../../../../src/lib/checkout.js';
 import { CHANNEL_WHATSAPP, normalizeContact, normalizePhone } from '../../../../src/lib/contact.js';
 import { destinationSummary } from '../../../../src/lib/shipping.js';
 import { MAX_VOUCHER_LEN, normalizeVoucherInput } from '../../../../src/lib/voucher.js';
@@ -283,7 +283,8 @@ function Checkout({ onPlaced }) {
   const selMethod = paymentMethods.find((p) => p.code === method);
   const estFee = estimatePaymentFee(estBase, selMethod);
   const shipPicked = liveShipping ? Boolean(quote) : Boolean(courier);
-  const busy = draftMutation.isPending || isLoading || hasBlockers;
+  const notReady = storeNotReady({ couriers, paymentMethods, liveShipping });
+  const busy = draftMutation.isPending || isLoading || hasBlockers || notReady.shipping || notReady.payment;
 
   return (
     <main aria-label="Checkout" className="bl-wrap" style={{ flex: 1, maxWidth: 1140, padding: '44px 32px 20px' }}>
@@ -363,6 +364,10 @@ function Checkout({ onPlaced }) {
                   setQuote(null);
                 }}
               />
+            ) : notReady.shipping ? (
+              <div className="bl-muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+                This shop has not set up shipping yet. Please contact the seller before ordering.
+              </div>
             ) : (
               <>
                 <div className="bl-muted" style={{ fontSize: 12.5, marginBottom: 14 }}>
@@ -395,6 +400,11 @@ function Checkout({ onPlaced }) {
             <div className="bl-card-title">
               <span className="n">3.</span> Payment
             </div>
+            {notReady.payment ? (
+              <div className="bl-muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+                This shop has not set up a payment method yet. Please contact the seller before ordering.
+              </div>
+            ) : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {paymentMethods.map((p) => {
                 const fits = methodFits(p, estBase);
