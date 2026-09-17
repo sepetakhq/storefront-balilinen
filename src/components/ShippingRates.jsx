@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { getShippingRates } from '../../../../src/api/endpoints.js';
-import { qk } from '../../../../src/api/queryKeys.js';
-import { fmt } from '../../../../src/shared/format.js';
-import { defaultOption, destinationLines, isStillOffered, weightInKg } from '../../../../src/lib/shipping.js';
+import { getShippingRates } from '@sepetakhq/storefront-kit/api/endpoints';
+import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { defaultOption, destinationLines, isStillOffered, weightInKg } from '@sepetakhq/storefront-kit/lib/shipping';
 import { OptionTile } from './OptionTile.jsx';
 
 /**

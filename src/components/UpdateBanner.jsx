@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 
-import { useBuildUpdate } from '../../../../src/shared/useBuildUpdate.js';
+import { useBuildUpdate } from '@sepetakhq/storefront-kit/shared/useBuildUpdate';
 
 // Where a buyer is mid-transaction. A reload is safe on both, but offering one
 // to someone halfway through paying is the worst moment to interrupt.

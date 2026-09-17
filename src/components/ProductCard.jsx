@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 
 import { Img, SIZES } from '../ui/Img.jsx';
 import { overlayLabel } from '../lib/copy.js';
-import { isPriceRange } from '../../../../src/lib/variants.js';
+import { isPriceRange } from '@sepetakhq/storefront-kit/lib/variants';
 import { FROM } from '../lib/copy.js';
-import { fmt } from '../../../../src/shared/format.js';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
 
 /**
  * `p` is the API's productCard DTO, consumed directly: the price here comes

@@ -20,13 +20,13 @@ import {
   SCHEDULED,
   ENDED,
   SOLD_OUT,
-} from '../../../../src/lib/availability.js';
-import { leadDays } from '../../../../src/lib/preorder.js';
+} from '@sepetakhq/storefront-kit/lib/availability';
+import { leadDays } from '@sepetakhq/storefront-kit/lib/preorder';
 import {
   CHANNEL_WHATSAPP,
   normalizeContact,
   normalizePhone,
-} from '../../../../src/lib/contact.js';
+} from '@sepetakhq/storefront-kit/lib/contact';
 
 // --- dates ------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import logoFile from '../assets/logo.png';
 
 /**

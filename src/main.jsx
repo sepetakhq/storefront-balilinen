@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 
-import { createQueryClient } from '../../../src/api/queryClient.js';
-import { purgeLegacyKeys } from '../../../src/lib/storage.js';
+import { createQueryClient } from '@sepetakhq/storefront-kit/api/queryClient';
+import { purgeLegacyKeys } from '@sepetakhq/storefront-kit/lib/storage';
 import { router } from './routes.jsx';
 import './styles.css';
 

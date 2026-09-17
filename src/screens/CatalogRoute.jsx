@@ -2,8 +2,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import ProductCard from '../components/ProductCard.jsx';
 import { EmptyState, ErrorState, InlineError, ProductGridSkeleton } from '../ui/states.jsx';
-import { useCategories, useProducts } from '../../../../src/hooks/queries.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
+import { useCategories, useProducts } from '@sepetakhq/storefront-kit/hooks/queries';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 
 const ALL = 'Semua'; // the API's own word for "no category filter"
 

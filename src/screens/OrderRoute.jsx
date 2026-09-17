@@ -7,12 +7,12 @@ import { QrCode, QrImage } from '../ui/Qr.jsx';
 import { CountdownClock } from '../ui/Countdown.jsx';
 import { EmptyState, ErrorState, Skeleton } from '../ui/states.jsx';
 import { CheckIcon } from '../components/icons.jsx';
-import { useOrder } from '../../../../src/hooks/queries.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { serverNow } from '../../../../src/api/client.js';
-import { fmt } from '../../../../src/shared/format.js';
-import { claimPayment, reopenPayment } from '../../../../src/api/endpoints.js';
-import { qk } from '../../../../src/api/queryKeys.js';
+import { useOrder } from '@sepetakhq/storefront-kit/hooks/queries';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { serverNow } from '@sepetakhq/storefront-kit/api/client';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { claimPayment, reopenPayment } from '@sepetakhq/storefront-kit/api/endpoints';
+import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
 import {
   PAY_DEAD,
   canClaimPayment,
@@ -23,9 +23,9 @@ import {
   isUsableRedirect,
   paymentState,
   splitUniqueCode,
-} from '../../../../src/lib/payment.js';
-import { useToast } from '../../../../src/ui/ToastProvider.jsx';
-import { orderMessage, waLink } from '../../../../src/lib/whatsapp.js';
+} from '@sepetakhq/storefront-kit/lib/payment';
+import { useToast } from '@sepetakhq/storefront-kit/ui/ToastProvider';
+import { orderMessage, waLink } from '@sepetakhq/storefront-kit/lib/whatsapp';
 import { PAY_TITLES, WA_MESSAGE, fmtDate, fmtDateTime, terminalNote } from '../lib/copy.js';
 
 const panel = { marginTop: 26, background: 'var(--bl-white)', border: '1px solid var(--bl-line)', borderRadius: 18 };

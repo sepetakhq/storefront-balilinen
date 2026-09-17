@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { useCart } from '../../../../src/cart/CartProvider.jsx';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
 import { Logo } from './Logo.jsx';
 import { BagIcon } from './icons.jsx';
 

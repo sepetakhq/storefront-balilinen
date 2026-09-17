@@ -2,9 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { Img, SIZES } from '../ui/Img.jsx';
 import { EmptyState, InlineError, Skeleton } from '../ui/states.jsx';
-import { useCart, MAX_QTY } from '../../../../src/cart/CartProvider.jsx';
-import { useCartLines } from '../../../../src/cart/useCartLines.js';
-import { fmt } from '../../../../src/shared/format.js';
+import { useCart, MAX_QTY } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { useCartLines } from '@sepetakhq/storefront-kit/cart/useCartLines';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
 import { VARIANT_GONE, blockerNotice, cartLineNote, orderNote } from '../lib/copy.js';
 
 const TONE = { green: 'var(--bl-green)', gold: 'var(--bl-gold)', terra: 'var(--bl-terra-dark)', muted: 'var(--bl-muted)' };

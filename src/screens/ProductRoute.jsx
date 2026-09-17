@@ -5,13 +5,13 @@ import ProductCard from '../components/ProductCard.jsx';
 import { WhatsAppIcon } from '../components/icons.jsx';
 import { Img, SIZES } from '../ui/Img.jsx';
 import { EmptyState, ErrorState, Skeleton } from '../ui/states.jsx';
-import { useProduct } from '../../../../src/hooks/queries.js';
-import { useCart } from '../../../../src/cart/CartProvider.jsx';
-import { isSoldOut, leadDays, maxQty } from '../../../../src/lib/preorder.js';
-import { isImminent, isScheduled, msUntilOpen } from '../../../../src/lib/availability.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { useToast } from '../../../../src/ui/ToastProvider.jsx';
-import { fmt, fmtClock, paragraphs } from '../../../../src/shared/format.js';
+import { useProduct } from '@sepetakhq/storefront-kit/hooks/queries';
+import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { isSoldOut, leadDays, maxQty } from '@sepetakhq/storefront-kit/lib/preorder';
+import { isImminent, isScheduled, msUntilOpen } from '@sepetakhq/storefront-kit/lib/availability';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { useToast } from '@sepetakhq/storefront-kit/ui/ToastProvider';
+import { fmt, fmtClock, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
 import { CHOOSE_VARIANT, FROM, buyLabel, chooseAxis, overlayLabel, pillState, stockNote, windowNote } from '../lib/copy.js';
 import {
   availableValues,
@@ -21,7 +21,7 @@ import {
   matchVariant,
   select,
   withVariant,
-} from '../../../../src/lib/variants.js';
+} from '@sepetakhq/storefront-kit/lib/variants';
 
 const TONE = { green: 'var(--bl-green)', gold: 'var(--bl-gold)', terra: 'var(--bl-terra-dark)', muted: 'var(--bl-muted)' };
 

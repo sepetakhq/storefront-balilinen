@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { useCategories } from '../../../../src/hooks/queries.js';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { useCategories } from '@sepetakhq/storefront-kit/hooks/queries';
 import { Logo } from './Logo.jsx';
 
 const heading = { fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 };

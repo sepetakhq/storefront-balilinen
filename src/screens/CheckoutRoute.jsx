@@ -8,20 +8,20 @@ import OtpModal from '../components/OtpModal.jsx';
 import DestinationPicker from '../components/DestinationPicker.jsx';
 import ShippingRates from '../components/ShippingRates.jsx';
 import { OptionTile } from '../components/OptionTile.jsx';
-import { useCart } from '../../../../src/cart/CartProvider.jsx';
-import { useCartLines } from '../../../../src/cart/useCartLines.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { createDraft, sendCheckoutCode, verifyCheckoutCode } from '../../../../src/api/endpoints.js';
-import { qk } from '../../../../src/api/queryKeys.js';
-import { lineKey } from '../../../../src/lib/variants.js';
-import { fmt } from '../../../../src/shared/format.js';
-import { confirmStep, estimatePaymentFee, estimateShipping, methodFits, storeNotReady } from '../../../../src/lib/checkout.js';
-import { CHANNEL_WHATSAPP, normalizeContact, normalizePhone } from '../../../../src/lib/contact.js';
-import { destinationSummary } from '../../../../src/lib/shipping.js';
-import { MAX_VOUCHER_LEN, normalizeVoucherInput } from '../../../../src/lib/voucher.js';
-import { clearCheckout, keyForAttempt, resetKeyForAttempt, saveCheckout } from '../../../../src/checkout/checkoutStorage.js';
-import { recordRetryAfter, recordSend, clearCooldown } from '../../../../src/checkout/otpCooldown.js';
-import { rememberOrder } from '../../../../src/checkout/orderTokens.js';
+import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { useCartLines } from '@sepetakhq/storefront-kit/cart/useCartLines';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { createDraft, sendCheckoutCode, verifyCheckoutCode } from '@sepetakhq/storefront-kit/api/endpoints';
+import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
+import { lineKey } from '@sepetakhq/storefront-kit/lib/variants';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { confirmStep, estimatePaymentFee, estimateShipping, methodFits, storeNotReady } from '@sepetakhq/storefront-kit/lib/checkout';
+import { CHANNEL_WHATSAPP, normalizeContact, normalizePhone } from '@sepetakhq/storefront-kit/lib/contact';
+import { destinationSummary } from '@sepetakhq/storefront-kit/lib/shipping';
+import { MAX_VOUCHER_LEN, normalizeVoucherInput } from '@sepetakhq/storefront-kit/lib/voucher';
+import { clearCheckout, keyForAttempt, resetKeyForAttempt, saveCheckout } from '@sepetakhq/storefront-kit/checkout/checkoutStorage';
+import { recordRetryAfter, recordSend, clearCooldown } from '@sepetakhq/storefront-kit/checkout/otpCooldown';
+import { rememberOrder } from '@sepetakhq/storefront-kit/checkout/orderTokens';
 import {
   FIELD_LABELS,
   contactField,

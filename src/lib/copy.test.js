@@ -20,7 +20,7 @@ import {
   WA_MESSAGE,
   windowNote,
 } from './copy.js';
-import { orderMessage } from '../../../../src/lib/whatsapp.js';
+import { orderMessage } from '@sepetakhq/storefront-kit/lib/whatsapp';
 
 describe('availability copy', () => {
   it('names each closed state the way the card overlay does', () => {

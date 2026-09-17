@@ -6,12 +6,12 @@ import Toast from './components/Toast.jsx';
 import UpdateBanner from './components/UpdateBanner.jsx';
 import { WhatsAppIcon } from './components/icons.jsx';
 import { BundledLogo } from './components/Logo.jsx';
-import { ConfigProvider, useConfig } from '../../../src/config/ConfigProvider.jsx';
-import { CartProvider } from '../../../src/cart/CartProvider.jsx';
-import { ToastProvider } from '../../../src/ui/ToastProvider.jsx';
-import { useHome, useProduct } from '../../../src/hooks/queries.js';
-import { useDocumentTitle } from '../../../src/hooks/useDocumentTitle.js';
-import { pageTitle } from '../../../src/lib/seo.js';
+import { ConfigProvider, useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { CartProvider } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { ToastProvider } from '@sepetakhq/storefront-kit/ui/ToastProvider';
+import { useHome, useProduct } from '@sepetakhq/storefront-kit/hooks/queries';
+import { useDocumentTitle } from '@sepetakhq/storefront-kit/hooks/useDocumentTitle';
+import { pageTitle } from '@sepetakhq/storefront-kit/lib/seo';
 import { pageName } from './lib/copy.js';
 
 export default function RootLayout() {

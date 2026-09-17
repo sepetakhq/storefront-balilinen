@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 
-import { sendLookupCode, verifyLookupCode } from '../../../../src/api/endpoints.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { normalizeContact } from '../../../../src/lib/contact.js';
-import { extractToken, forgetOrder, listOrders } from '../../../../src/checkout/orderTokens.js';
-import { deviceRows, tokensOf } from '../../../../src/lib/deviceOrders.js';
-import { useOrdersByToken } from '../../../../src/hooks/queries.js';
-import { recordRetryAfter, recordSend, cooldown } from '../../../../src/checkout/otpCooldown.js';
-import { fmt } from '../../../../src/shared/format.js';
+import { sendLookupCode, verifyLookupCode } from '@sepetakhq/storefront-kit/api/endpoints';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { normalizeContact } from '@sepetakhq/storefront-kit/lib/contact';
+import { extractToken, forgetOrder, listOrders } from '@sepetakhq/storefront-kit/checkout/orderTokens';
+import { deviceRows, tokensOf } from '@sepetakhq/storefront-kit/lib/deviceOrders';
+import { useOrdersByToken } from '@sepetakhq/storefront-kit/hooks/queries';
+import { recordRetryAfter, recordSend, cooldown } from '@sepetakhq/storefront-kit/checkout/otpCooldown';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
 import { CountdownWords } from '../ui/Countdown.jsx';
 import { contactField, fmtDate, OTP_INVALID, validateContact } from '../lib/copy.js';
 

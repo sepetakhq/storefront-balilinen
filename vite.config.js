@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-import { seoDevPlugin } from '../../vite-plugin-seo.js';
+import { seoDevPlugin } from '../../packages/storefront-kit/vite/seoDevPlugin.js';
+import { kitAlias } from '../../vite.config.js';
 
 // Bali Linen's storefront: a second Vite app with its own look, sharing the
-// root storefront's non-visual layer (src/api, src/config, src/cart, ...) by
-// relative import, the way admin/ does. The Go binary embeds its build beside
-// the root one and serves it to any tenant whose brand.template says
-// "balilinen" (backend/internal/webui).
+// non-visual layer through @sepetakhq/storefront-kit (source-linked here, a
+// published package once this app has a repo of its own). The Go binary
+// embeds its build beside the root one and serves it to any tenant whose
+// brand.template says "balilinen" (backend/internal/webui).
 //
 // Same proxy posture as the root config, and for the same reason: the API
 // resolves the tenant from the Host header, so changeOrigin stays false.
@@ -23,6 +24,7 @@ const host = 'balilinen.localhost';
 export default defineConfig({
   root: __dirname,
   plugins: [react(), seoDevPlugin({ apiTarget, devPort, host })],
+  resolve: { alias: [kitAlias] },
   server: {
     port: devPort,
     strictPort: true,

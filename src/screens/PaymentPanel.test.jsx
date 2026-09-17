@@ -5,13 +5,13 @@ afterEach(cleanup);
 
 // Mocked rather than wrapped in a real ConfigProvider, which would need a
 // network request and a QueryClient to answer a question about rendering.
-vi.mock('../../../../src/config/ConfigProvider.jsx', () => ({
+vi.mock('@sepetakhq/storefront-kit/config/ConfigProvider', () => ({
   useConfig: () => ({
     brand: { whatsapp_url: 'https://wa.me/628110000000', whatsapp_text: 'Chat with us' },
     payment: { qris_merchant_name: 'BALI LINEN', qris_nmid: 'ID10269876543', account_holder: 'a/n BALI LINEN' },
   }),
 }));
-vi.mock('../../../../src/ui/ToastProvider.jsx', () => ({ useToast: () => () => {} }));
+vi.mock('@sepetakhq/storefront-kit/ui/ToastProvider', () => ({ useToast: () => () => {} }));
 
 const { PaymentPanel } = await import('./OrderRoute.jsx');
 

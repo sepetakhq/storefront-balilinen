@@ -6,10 +6,10 @@ import { WhatsAppIcon } from '../components/icons.jsx';
 import { Img, SIZES } from '../ui/Img.jsx';
 import { CountdownClockSeconds } from '../ui/Countdown.jsx';
 import { ErrorState, ProductGridSkeleton, Skeleton } from '../ui/states.jsx';
-import { useHome } from '../../../../src/hooks/queries.js';
-import { qk } from '../../../../src/api/queryKeys.js';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { fmt } from '../../../../src/shared/format.js';
+import { useHome } from '@sepetakhq/storefront-kit/hooks/queries';
+import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { fmt } from '@sepetakhq/storefront-kit/shared/format';
 import { discountLabel } from '../lib/copy.js';
 
 const h2 = { fontSize: 32 };

@@ -1,7 +1,7 @@
 import { Img, SIZES } from '../ui/Img.jsx';
 import { WhatsAppIcon } from '../components/icons.jsx';
-import { useConfig } from '../../../../src/config/ConfigProvider.jsx';
-import { paragraphs } from '../../../../src/shared/format.js';
+import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
+import { paragraphs } from '@sepetakhq/storefront-kit/shared/format';
 
 export default function About() {
   const { brand, tenant } = useConfig();

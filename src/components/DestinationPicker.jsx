@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { resolveDestination, searchDestinations } from '../../../../src/api/endpoints.js';
-import { qk } from '../../../../src/api/queryKeys.js';
-import { destinationLines, isUnserved, matchRange, unservedAlternatives } from '../../../../src/lib/shipping.js';
+import { resolveDestination, searchDestinations } from '@sepetakhq/storefront-kit/api/endpoints';
+import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
+import { destinationLines, isUnserved, matchRange, unservedAlternatives } from '@sepetakhq/storefront-kit/lib/shipping';
 
 const MIN_QUERY = 3;
 
