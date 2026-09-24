@@ -101,9 +101,14 @@ export function buyLabel(product) {
 
 // --- pre-order and stock ----------------------------------------------------
 
-/** The one-line note under a product: pre-order first, then the stock ladder. */
-export function stockNote(product, originCity) {
+/**
+ * The one-line note under a product: pre-order first, then the stock ladder.
+ * Where it ships from is the shop's city behind its origin_prefix label; no
+ * dispatch time is promised, since no merchant ever set one.
+ */
+export function stockNote(product, originCity, sections) {
   if (!product) return null;
+  const from = originCity ? ` — ${sectionText(sections, 'origin_prefix')} ${originCity}` : '';
   if (product.preorder) {
     const days = leadDays(product);
     return {
@@ -117,7 +122,7 @@ export function stockNote(product, originCity) {
   // Never null for a product -- ProductRoute reads .tone unguarded.
   if (product.unlimited_stock) {
     return {
-      text: `In stock${originCity ? ` — ships from ${originCity} in 1–2 business days` : ''}`,
+      text: `In stock${from}`,
       tone: 'green',
     };
   }
@@ -125,7 +130,7 @@ export function stockNote(product, originCity) {
   if (stock <= 0) return { text: 'Out of stock — restocking soon', tone: 'terra' };
   if (stock < 10) return { text: `Only ${stock} left — don’t miss out`, tone: 'gold' };
   return {
-    text: `In stock (${stock} pcs)${originCity ? ` — ships from ${originCity} in 1–2 business days` : ''}`,
+    text: `In stock (${stock} pcs)${from}`,
     tone: 'green',
   };
 }
@@ -204,7 +209,10 @@ export const VARIANT_GONE = 'This variant is no longer sold';
 
 // --- campaigns --------------------------------------------------------------
 
+/** What follows the campaign's title: the merchant's headline, else what it takes off. */
 export function discountLabel(campaign, fmt) {
+  const own = String(campaign?.headline ?? '').trim();
+  if (own) return own;
   if (campaign.discount_type === 'percentage') return `−${campaign.discount_value}%`;
   return `−${fmt(campaign.discount_value)}`;
 }
@@ -372,14 +380,80 @@ export const WA_MESSAGE = {
 // --- document title ---------------------------------------------------------
 
 /** The page half of the tab title, '' while its data has not loaded. */
-export function pageName(pathname, { product, taglineShort } = {}) {
+export function pageName(pathname, { product, taglineShort, nav } = {}) {
   if (pathname === '/' || pathname === '') return String(taglineShort ?? '').replace(/\s+/g, ' ').trim().slice(0, 40);
-  if (pathname.startsWith('/katalog')) return 'Shop';
-  if (pathname.startsWith('/tentang')) return 'Our story';
+  if (pathname.startsWith('/katalog')) return navLabel(nav, '/katalog') || 'Shop';
+  if (pathname.startsWith('/tentang')) return navLabel(nav, '/tentang') || DEFAULT_LABELS.hero_secondary_cta;
   if (pathname.startsWith('/keranjang')) return 'Cart';
   if (pathname.startsWith('/checkout')) return 'Checkout';
   if (pathname.startsWith('/lacak')) return 'Track order';
   if (pathname.startsWith('/produk/')) return product?.name ?? '';
   if (pathname.startsWith('/pesanan/') || pathname.startsWith('/track/')) return 'Order';
   return '';
+}
+
+// --- merchant labels --------------------------------------------------------
+
+/**
+ * This template's own wording for every section_copy label it draws. The
+ * merchant's text from the backoffice replaces each one; blank keeps these,
+ * so a shop that never touched them reads as the design does.
+ */
+export const DEFAULT_LABELS = {
+  cats_heading: 'Shop by category',
+  grid_see_all: 'Browse all',
+  story_eyebrow: 'Our story',
+  story_cta: 'Read our story',
+  hero_secondary_cta: 'Our story',
+  product_details_heading: 'Description',
+  product_care_heading: 'Care',
+  product_shipping_heading: 'Shipping & delivery',
+  related_heading: 'You may also like',
+  product_ask_label: 'Ask about this product on WhatsApp',
+  product_ask_message: 'Hi! I have a question about "{product}".',
+  footer_categories_heading: 'Shop',
+  footer_payment_heading: 'Payment methods',
+  footer_shipping_heading: 'Shipping',
+  origin_prefix: 'ships from',
+  countdown_label: 'Ends in',
+};
+
+/** One label: the merchant's section_copy text, trimmed, else the template's. */
+export function sectionText(sections, key) {
+  return String(sections?.[key] ?? '').trim() || DEFAULT_LABELS[key] || '';
+}
+
+/** A link label with the design's arrow, unless the merchant already typed one. */
+export function withArrow(text) {
+  return /→\s*$/.test(text) ? text : `${text} →`;
+}
+
+/** The label the merchant's nav gives a page, or ''. */
+export function navLabel(nav, path) {
+  return String((nav ?? []).find((n) => n?.path === path)?.label ?? '').trim();
+}
+
+/**
+ * The hero's second button: the merchant's hero_secondary_cta, else the name
+ * the nav gives the story page, else the template's.
+ */
+export function heroSecondaryLabel(sections, nav) {
+  return String(sections?.hero_secondary_cta ?? '').trim() || navLabel(nav, '/tentang') || DEFAULT_LABELS.hero_secondary_cta;
+}
+
+/**
+ * The "ask about this product" link: the shop's WhatsApp URL with the
+ * merchant's question (or the template's) set through URL, so a URL that
+ * already carries a query keeps it. Anything not http(s) gives no link.
+ */
+export function askLink(whatsappUrl, sections, productName) {
+  let url;
+  try {
+    url = new URL(whatsappUrl);
+  } catch {
+    return '';
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return '';
+  url.searchParams.set('text', sectionText(sections, 'product_ask_message').replaceAll('{product}', String(productName ?? '')));
+  return url.toString();
 }

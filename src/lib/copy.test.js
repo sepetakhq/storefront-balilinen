@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  askLink,
+  discountLabel,
+  heroSecondaryLabel,
+  sectionText,
+  withArrow,
   blockerNotice,
   chooseAxis,
   pillState,
@@ -54,7 +59,7 @@ describe('stock copy', () => {
     expect(stockNote({ stock: 0 }).tone).toBe('terra');
     expect(stockNote({ stock: 3 }).text).toBe('Only 3 left — don’t miss out');
     expect(stockNote({ stock: 40 }, 'Denpasar').text).toBe(
-      'In stock (40 pcs) — ships from Denpasar in 1–2 business days',
+      'In stock (40 pcs) — ships from Denpasar',
     );
     expect(stockNote(null)).toBeNull();
   });
@@ -65,7 +70,7 @@ describe('stock copy', () => {
     expect(stockNote({ unlimited_stock: true, stock: 0 })).toEqual({ text: 'In stock', tone: 'green' });
     expect(stockNote({ unlimited_stock: true, stock: 42 }).text).toBe('In stock');
     expect(stockNote({ unlimited_stock: true, stock: 0 }, 'Denpasar').text).toBe(
-      'In stock — ships from Denpasar in 1–2 business days',
+      'In stock — ships from Denpasar',
     );
   });
 
@@ -194,5 +199,63 @@ describe('variants', () => {
     expect(blockerNotice(['ok', 'variant_required'])).toMatch(/choose one/);
     expect(blockerNotice(['variant_required', 'soldout'])).toMatch(/Remove it/);
     expect(cartLineNote('variant_required', {}, 0).text).toMatch(/Pick one/);
+  });
+});
+
+describe('merchant labels', () => {
+  it('uses the merchant text, trimmed, else the template wording', () => {
+    expect(sectionText({ related_heading: '  Pairs well with  ' }, 'related_heading')).toBe('Pairs well with');
+    expect(sectionText({ related_heading: '   ' }, 'related_heading')).toBe('You may also like');
+    expect(sectionText(undefined, 'countdown_label')).toBe('Ends in');
+    expect(sectionText({}, 'footer_payment_heading')).toBe('Payment methods');
+  });
+
+  it('adds the arrow once', () => {
+    expect(withArrow('Browse all')).toBe('Browse all →');
+    expect(withArrow('See everything →')).toBe('See everything →');
+  });
+
+  it('labels the hero button: own text, else the nav, else the template', () => {
+    const nav = [{ path: '/tentang', label: 'About us' }];
+    expect(heroSecondaryLabel({ hero_secondary_cta: 'Meet the makers' }, nav)).toBe('Meet the makers');
+    expect(heroSecondaryLabel({}, nav)).toBe('About us');
+    expect(heroSecondaryLabel({}, [])).toBe('Our story');
+  });
+
+  it('names the shop and story tabs the way the nav does', () => {
+    const nav = [{ path: '/katalog', label: 'Collection' }, { path: '/tentang', label: 'About us' }];
+    expect(pageName('/katalog', { nav })).toBe('Collection');
+    expect(pageName('/tentang', { nav })).toBe('About us');
+    expect(pageName('/tentang')).toBe('Our story');
+  });
+
+  it('prefixes the origin with the merchant label and promises no dispatch time', () => {
+    expect(stockNote({ stock: 40 }, 'Denpasar', { origin_prefix: 'dispatched from' }).text).toBe('In stock (40 pcs) — dispatched from Denpasar');
+  });
+
+  it('prefers the campaign headline over the discount', () => {
+    const f = (n) => `Rp ${n}`;
+    expect(discountLabel({ headline: '  Up to half off ', discount_type: 'percentage', discount_value: 50 }, f)).toBe('Up to half off');
+    expect(discountLabel({ discount_type: 'percentage', discount_value: 50 }, f)).toBe('−50%');
+    expect(discountLabel({ discount_type: 'fixed', discount_value: 5000 }, f)).toBe('−Rp 5000');
+  });
+});
+
+describe('askLink', () => {
+  it('sets the question through URL, keeping an existing query', () => {
+    const u = new URL(askLink('https://api.whatsapp.com/send?phone=6281', {}, 'Bath Towel'));
+    expect(u.searchParams.get('phone')).toBe('6281');
+    expect(u.searchParams.get('text')).toBe('Hi! I have a question about "Bath Towel".');
+  });
+
+  it("uses the merchant's message", () => {
+    const u = new URL(askLink('https://wa.me/6281', { product_ask_message: 'Is {product} in stock?' }, 'Sheet'));
+    expect(u.searchParams.get('text')).toBe('Is Sheet in stock?');
+  });
+
+  it('gives no link for a missing or non-http URL', () => {
+    expect(askLink('', {}, 'x')).toBe('');
+    expect(askLink(undefined, {}, 'x')).toBe('');
+    expect(askLink('javascript:alert(1)', {}, 'x')).toBe('');
   });
 });

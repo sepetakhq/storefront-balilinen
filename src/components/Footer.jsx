@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { useCategories } from '@sepetakhq/storefront-kit/hooks/queries';
 import { Logo } from './Logo.jsx';
+import { sectionText } from '../lib/copy.js';
 
 const heading = { fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 };
 const chip = { border: '1px solid var(--bl-line)', borderRadius: 8, padding: '6px 11px', fontSize: 12, color: 'var(--bl-muted)' };
@@ -38,7 +39,7 @@ export default function Footer() {
           </div>
         </div>
         <div>
-          <div style={heading}>Shop</div>
+          <div style={heading}>{sectionText(brand.sections, 'footer_categories_heading')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 9, alignItems: 'flex-start' }}>
             {(cats ?? []).map((c) => (
               <Link key={c.key} to={`/katalog?cat=${encodeURIComponent(c.key)}`} style={{ fontSize: 14, color: 'var(--bl-muted)' }}>
@@ -51,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
         <div>
-          <div style={heading}>Payment methods</div>
+          <div style={heading}>{sectionText(brand.sections, 'footer_payment_heading')}</div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             {paymentMethods.map((m) => (
               <span key={m.code} style={chip}>
@@ -61,7 +62,7 @@ export default function Footer() {
           </div>
         </div>
         <div>
-          <div style={heading}>Shipping</div>
+          <div style={heading}>{sectionText(brand.sections, 'footer_shipping_heading')}</div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             {couriers.map((c) => (
               <span key={c.code} style={chip}>

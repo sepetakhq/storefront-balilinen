@@ -2,6 +2,7 @@ import { Img, SIZES } from '../ui/Img.jsx';
 import { WhatsAppIcon } from '../components/icons.jsx';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { paragraphs } from '@sepetakhq/storefront-kit/shared/format';
+import { sectionText } from '../lib/copy.js';
 
 export default function About() {
   const { brand, tenant } = useConfig();
@@ -25,7 +26,7 @@ export default function About() {
     >
       <Img src={portrait?.url} srcSet={portrait?.srcset} sizes={SIZES.hero} alt={portrait?.alt || ''} ratio="1/1" radius={20} className="bl-sticky" />
       <div>
-        <div className="bl-eyebrow plain">{brand.sections.story_eyebrow}</div>
+        <div className="bl-eyebrow plain">{sectionText(brand.sections, 'story_eyebrow')}</div>
         <h1 className="bl-display" style={{ fontSize: 40, margin: '14px 0 0' }}>
           {title}
         </h1>

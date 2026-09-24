@@ -12,7 +12,7 @@ import { isImminent, isScheduled, msUntilOpen } from '@sepetakhq/storefront-kit/
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { useToast } from '@sepetakhq/storefront-kit/ui/ToastProvider';
 import { fmt, fmtClock, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
-import { CHOOSE_VARIANT, FROM, buyLabel, chooseAxis, overlayLabel, pillState, stockNote, windowNote } from '../lib/copy.js';
+import { CHOOSE_VARIANT, FROM, askLink, buyLabel, chooseAxis, overlayLabel, pillState, sectionText, stockNote, windowNote } from '../lib/copy.js';
 import {
   availableValues,
   galleryFor,
@@ -112,7 +112,7 @@ function ProductView({ product, onOpen }) {
   // Never null for a product (copy.js keeps that contract, including for
   // unlimited stock), so .tone below is read unguarded. Hidden until a
   // variant is picked: the picker is where the stock answer lives.
-  const stock = stockNote(sellable, brand.origin_city);
+  const stock = stockNote(sellable, brand.origin_city, brand.sections);
   const saleWindow = windowNote(product);
   const label = buyLabel(sellable);
   const blocked = isSoldOut(sellable) || Boolean(label);
@@ -135,10 +135,12 @@ function ProductView({ product, onOpen }) {
     freeShipping ? `Free shipping on orders over ${freeShippingMinLabel}.` : '',
   ].filter(Boolean);
   const tabs = [
-    { key: 'desc', label: 'Description', paras: paragraphs(product.description), spec: spec.join(' '), specLabel: product.spec_label || 'Material' },
-    { key: 'care', label: 'Care', paras: care },
-    { key: 'ship', label: 'Shipping & delivery', paras: shipping },
+    { key: 'desc', label: sectionText(brand.sections, 'product_details_heading'), paras: paragraphs(product.description), spec: spec.join(' '), specLabel: product.spec_label || 'Material' },
+    { key: 'care', label: sectionText(brand.sections, 'product_care_heading'), paras: care },
+    { key: 'ship', label: sectionText(brand.sections, 'product_shipping_heading'), paras: shipping },
   ].filter((t) => t.paras.length > 0 || t.spec);
+
+  const ask = askLink(brand.whatsapp_url, brand.sections, product.name);
 
   const add = () => {
     cart.add(product, qty, variant?.id ?? null);
@@ -266,16 +268,16 @@ function ProductView({ product, onOpen }) {
               Pre-order: we make this after your payment lands{days ? `, and ship in about ${days} days.` : '.'}
             </div>
           ) : null}
-          {brand.whatsapp_url ? (
+          {ask ? (
             <a
-              href={`${brand.whatsapp_url}?text=${encodeURIComponent(`Hi! I have a question about "${product.name}".`)}`}
+              href={ask}
               target="_blank"
               rel="noopener noreferrer"
               className="bl-btn wa-outline block"
               style={{ marginTop: 12 }}
             >
               <WhatsAppIcon size={18} color="var(--bl-wa)" />
-              Ask about this product on WhatsApp
+              {sectionText(brand.sections, 'product_ask_label')}
             </a>
           ) : null}
 
@@ -322,7 +324,7 @@ function ProductView({ product, onOpen }) {
       {product.related?.length > 0 ? (
         <section style={{ marginTop: 70 }}>
           <h2 className="bl-display" style={{ fontSize: 28, margin: '0 0 20px' }}>
-            You may also like
+            {sectionText(brand.sections, 'related_heading')}
           </h2>
           <div className="bl-grid">
             {product.related.map((p) => (
@@ -357,7 +359,7 @@ function ProductSkeleton() {
 }
 
 /**
- * One row of pills per axis, the Bali Linen way: same decisions as the
+ * One row of pills per axis, this template's way: same decisions as the
  * Indonesian storefront (src/lib/variants.js), rendered as .bl-tile pills. A
  * combination the shop does not sell is dashed, a sold-out one struck through.
  */

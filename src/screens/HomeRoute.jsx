@@ -10,7 +10,7 @@ import { useHome } from '@sepetakhq/storefront-kit/hooks/queries';
 import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { fmt } from '@sepetakhq/storefront-kit/shared/format';
-import { discountLabel } from '../lib/copy.js';
+import { discountLabel, heroSecondaryLabel, sectionText, withArrow } from '../lib/copy.js';
 
 const h2 = { fontSize: 32 };
 const sectionHead = {
@@ -95,12 +95,12 @@ function Hero({ hero }) {
         </p>
         <div style={{ display: 'flex', gap: 14, marginTop: 32, flexWrap: 'wrap' }}>
           <Link to="/katalog" className="bl-btn primary">
-            {hero.cta}
+            {hero.cta || 'Shop now'}
           </Link>
-          {/* The design labels this button the way the nav names the page,
-              not with the story section's "Read more". */}
+          {/* The merchant's hero_secondary_cta, else the name the nav gives
+              the page -- not the story section's "Read more". */}
           <Link to="/tentang" className="bl-btn ghost">
-            {brand.nav.find((n) => n.path === '/tentang')?.label || 'Our story'}
+            {heroSecondaryLabel(brand.sections, brand.nav)}
           </Link>
         </div>
         {stats.length ? (
@@ -142,10 +142,10 @@ function Categories({ cats }) {
     <section className="bl-wrap" style={{ padding: '56px 32px 8px' }}>
       <div style={sectionHead}>
         <h2 className="bl-display" style={h2}>
-          {brand.sections.cats_heading}
+          {sectionText(brand.sections, 'cats_heading')}
         </h2>
         <Link to="/katalog" className="bl-link">
-          {brand.sections.grid_see_all || 'Browse all →'}
+          {withArrow(sectionText(brand.sections, 'grid_see_all'))}
         </Link>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
@@ -187,6 +187,7 @@ function Categories({ cats }) {
 const HOURS_72 = 72 * 60 * 60 * 1000;
 
 function Campaign({ campaign }) {
+  const { brand } = useConfig();
   const queryClient = useQueryClient();
   if (!campaign) return null;
   const endsAt = campaign.ends_at;
@@ -199,10 +200,10 @@ function Campaign({ campaign }) {
       <div style={{ background: 'var(--bl-peach-wash)', border: '1px solid var(--bl-peach-line)', borderRadius: 20, padding: '36px 36px 40px' }}>
         <div style={{ ...sectionHead, alignItems: 'flex-end', gap: 14 }}>
           <div>
-            {/* The promotion's badge is what the cards wear ("-10%"); the
-                eyebrow over the strip is the design's fixed label. */}
+            {/* The merchant's badge; while the clock runs and there is none,
+                the design's own eyebrow. */}
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--bl-terra)' }}>
-              {showCountdown ? 'Limited time' : campaign.badge}
+              {campaign.badge || (showCountdown ? 'Limited time' : '')}
             </div>
             <h2 className="bl-display" style={{ fontSize: 30, margin: '6px 0 0' }}>
               {campaign.title} <span style={{ color: 'var(--bl-terra)' }}>{discountLabel(campaign, fmt)}</span>
@@ -210,7 +211,7 @@ function Campaign({ campaign }) {
           </div>
           {showCountdown ? (
             <div className="bl-muted" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5 }}>
-              <span>Ends in</span>
+              <span>{sectionText(brand.sections, 'countdown_label')}</span>
               <CountdownClockSeconds
                 until={endsAt}
                 onExpire={() => queryClient.invalidateQueries({ queryKey: qk.home })}
@@ -248,7 +249,7 @@ function Grid({ grid, priority }) {
           {grid.title}
         </h2>
         <Link to="/katalog" className="bl-link">
-          {brand.sections.grid_see_all}
+          {withArrow(sectionText(brand.sections, 'grid_see_all'))}
         </Link>
       </div>
       <div className="bl-grid">
@@ -321,7 +322,7 @@ function Story({ story }) {
     >
       <Img src={portrait?.url} srcSet={portrait?.srcset} sizes={SIZES.hero} alt={portrait?.alt || ''} ratio="600/380" radius={20} />
       <div>
-        <div className="bl-eyebrow plain">{brand.sections.story_eyebrow}</div>
+        <div className="bl-eyebrow plain">{sectionText(brand.sections, 'story_eyebrow')}</div>
         <h2 className="bl-display" style={{ fontSize: 34, lineHeight: 1.2, margin: '14px 0 0' }}>
           {story.title}
         </h2>
@@ -329,7 +330,7 @@ function Story({ story }) {
           {story.text}
         </p>
         <Link to="/tentang" className="bl-link" style={{ display: 'inline-block', marginTop: 22 }}>
-          {brand.sections.story_cta} →
+          {withArrow(sectionText(brand.sections, 'story_cta'))}
         </Link>
       </div>
     </section>

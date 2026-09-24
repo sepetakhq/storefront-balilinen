@@ -5,7 +5,6 @@ import Footer from './components/Footer.jsx';
 import Toast from './components/Toast.jsx';
 import UpdateBanner from './components/UpdateBanner.jsx';
 import { WhatsAppIcon } from './components/icons.jsx';
-import { BundledLogo } from './components/Logo.jsx';
 import { ConfigProvider, useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { CartProvider } from '@sepetakhq/storefront-kit/cart/CartProvider';
 import { ToastProvider } from '@sepetakhq/storefront-kit/ui/ToastProvider';
@@ -107,7 +106,7 @@ function DocumentTitle() {
   const { data: product } = useProduct(slug);
   const brandName =
     [brand?.wordmark_primary, brand?.wordmark_accent].filter(Boolean).join(' ') || tenant?.name || '';
-  useDocumentTitle(pageTitle(pageName(pathname, { product, taglineShort: brand?.tagline_short }), brandName));
+  useDocumentTitle(pageTitle(pageName(pathname, { product, taglineShort: brand?.tagline_short, nav: brand?.nav }), brandName));
   return null;
 }
 
@@ -160,10 +159,9 @@ export function StoreUnavailable({ error, onRetry }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
       <div style={{ maxWidth: 460, textAlign: 'center' }}>
-        {/* The bundled mark, not <Logo/>: this renders before the config that
-            would carry an uploaded one. */}
-        <BundledLogo height={38} style={{ opacity: 0.7, margin: '0 auto' }} />
-        <h1 className="bl-display" style={{ fontSize: 30, margin: '26px 0 0' }}>
+        {/* No mark: like the splash, this renders without the config that
+            says whose shop this is. */}
+        <h1 className="bl-display" style={{ fontSize: 30, margin: 0 }}>
           {title}
         </h1>
         <p className="bl-muted" style={{ fontSize: 15, lineHeight: 1.65, margin: '12px 0 0', textWrap: 'pretty' }}>
