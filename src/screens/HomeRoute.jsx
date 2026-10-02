@@ -156,7 +156,8 @@ function Categories({ cats }) {
             className="bl-product-card"
             style={{ position: 'relative', height: 230, borderRadius: 18, background: 'var(--bl-sand)' }}
           >
-            <Img src={c.image} srcSet={c.image_srcset} sizes={SIZES.categoryTile} alt="" ratio={undefined} style={{ position: 'absolute', inset: 0 }} />
+            {/* "auto", not undefined: undefined takes Img's 4/5 default and spills past the 230px card. */}
+            <Img src={c.image} srcSet={c.image_srcset} sizes={SIZES.categoryTile} alt="" ratio="auto" style={{ position: 'absolute', inset: 0 }} />
             <div
               style={{
                 position: 'absolute',
