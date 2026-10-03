@@ -382,6 +382,7 @@ function Checkout({ onPlaced }) {
                         key={c.code}
                         selected={courier === c.code}
                         onClick={() => setCourier(c.code)}
+                        logo={c.logo_url}
                         right={<span style={{ fontWeight: 800, fontSize: 14, color: cost === 0 ? 'var(--bl-green)' : 'var(--bl-ink)', whiteSpace: 'nowrap' }}>{cost === 0 ? 'FREE' : fmt(cost)}</span>}
                       >
                         <span style={{ fontWeight: 700, fontSize: 14 }}>{c.name}</span>{' '}
@@ -415,6 +416,7 @@ function Checkout({ onPlaced }) {
                     selected={method === p.code}
                     disabled={!fits}
                     onClick={() => fits && setMethod(p.code)}
+                    logo={p.logo_url}
                     right={<span className="bl-muted" style={{ fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{fee ? `+ ${fmt(fee)}` : 'No fee'}</span>}
                   >
                     <span style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</span>
