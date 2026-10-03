@@ -83,14 +83,21 @@ export function RateProblem({ error, onRetry, onEdit }) {
   const status = error?.status;
   const code = error?.code;
   const retryable = !error || status === 503 || status >= 500 || error?.isNetwork;
+  // The shop has spent its live rate checks for the month. The API's
+  // message is Indonesian, so this template says it in its own language.
+  const exhausted = !retryable && code === 'rate_checks_exhausted';
   const heading = retryable
     ? 'Rates can’t be worked out right now.'
-    : code === 'shipping_unavailable'
+    : exhausted
+      ? 'Live shipping rates are unavailable right now.'
+      : code === 'shipping_unavailable'
       ? 'Rates for these products can’t be worked out yet.'
       : 'No courier serves this area yet.';
   const body = retryable
     ? 'Try again in a moment.'
-    : code === 'shipping_unavailable'
+    : exhausted
+      ? 'Please contact the shop to complete your order.'
+      : code === 'shipping_unavailable'
       ? 'Please contact the shop — the product data is incomplete.'
       : 'Try a neighbouring kecamatan.';
 
