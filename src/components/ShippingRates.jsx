@@ -60,6 +60,7 @@ export default function ShippingRates({ destination, items, selected, onSelect, 
                 key={o.quote_id}
                 selected={selected === o.quote_id}
                 onClick={() => onSelect(o)}
+                logo={o.courier_logo_url}
                 right={<span style={{ fontWeight: 800, fontSize: 14, color: cost === 0 ? 'var(--bl-green)' : 'var(--bl-ink)', whiteSpace: 'nowrap' }}>{cost === 0 ? 'FREE' : fmt(cost)}</span>}
               >
                 <span style={{ fontWeight: 700, fontSize: 14 }}>{o.name}</span>{' '}

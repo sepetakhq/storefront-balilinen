@@ -135,6 +135,11 @@ input, select, textarea { font-family: inherit; color: var(--bl-ink); }
 .bl-tile:disabled { opacity: 0.5; cursor: not-allowed; }
 .bl-tile .dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--bl-dot); background: var(--bl-white); flex: none; }
 .bl-tile[aria-pressed='true'] .dot { border-color: var(--bl-green-2); background: var(--bl-green-2); }
+/* The method's or courier's badge, beside the price: names stay aligned whether a row has one or not. */
+.bl-choice-logo { display: block; height: 20px; width: auto; max-width: 64px; object-fit: contain; flex: none; }
+@media (max-width: 480px) { .bl-choice-logo { height: 16px; max-width: 48px; } }
+/* Footer badge: the text chip's own white card and border. */
+.bl-logo-chip img { display: block; height: 16px; width: auto; max-width: 76px; object-fit: contain; }
 
 /* Pills */
 .bl-pill { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }

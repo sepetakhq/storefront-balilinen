@@ -6,7 +6,7 @@ import { Logo } from './Logo.jsx';
 import { sectionText } from '../lib/copy.js';
 
 const heading = { fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 };
-const chip = { border: '1px solid var(--bl-line)', borderRadius: 8, padding: '6px 11px', fontSize: 12, color: 'var(--bl-muted)' };
+const chip = { display: 'inline-flex', alignItems: 'center', minHeight: 30, border: '1px solid var(--bl-line)', borderRadius: 8, padding: '6px 11px', fontSize: 12, color: 'var(--bl-muted)' };
 
 export default function Footer() {
   const { brand, couriers, paymentMethods } = useConfig();
@@ -54,20 +54,16 @@ export default function Footer() {
         <div>
           <div style={heading}>{sectionText(brand.sections, 'footer_payment_heading')}</div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-            {paymentMethods.map((m) => (
-              <span key={m.code} style={chip}>
-                {m.name}
-              </span>
+            {chips(paymentMethods).map((m) => (
+              <Chip key={m.code} item={m} />
             ))}
           </div>
         </div>
         <div>
           <div style={heading}>{sectionText(brand.sections, 'footer_shipping_heading')}</div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-            {couriers.map((c) => (
-              <span key={c.code} style={chip}>
-                {c.name}
-              </span>
+            {chips(couriers).map((c, i) => (
+              <Chip key={`${c.code}-${i}`} item={c} />
             ))}
           </div>
           {brand.productShippingCopy ? (
@@ -97,5 +93,24 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+/**
+ * One chip per badge: "VA BCA" and "Transfer BCA", or JNE REG and JNE YES,
+ * are the same mark to a buyer checking whether the shop takes their bank or
+ * ships with their courier. A name the platform has no badge for stays text.
+ */
+export function chips(items) {
+  const seen = new Set();
+  return items.filter((x) => !x.logo_url || (!seen.has(x.logo_url) && seen.add(x.logo_url)));
+}
+
+function Chip({ item }) {
+  if (!item.logo_url) return <span style={chip}>{item.name}</span>;
+  return (
+    <span className="bl-logo-chip" style={{ ...chip, background: 'var(--bl-white)' }} title={item.name}>
+      <img src={item.logo_url} alt={item.name} loading="lazy" />
+    </span>
   );
 }
