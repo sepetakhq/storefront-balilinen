@@ -191,13 +191,22 @@ export default function OrderRoute() {
           <span className="k">Subtotal</span>
           <span className="v">{fmt(order.subtotal)}</span>
         </div>
-        {order.discount_total > 0 ? (
+        {order.discount_total - (order.points_discount ?? 0) > 0 ? (
           <div className="bl-row">
             <span className="k">
               {order.voucher_code ? `Code ${order.voucher_code}` : order.promotion_name ? `Discount · ${order.promotion_name}` : 'Discount'}
             </span>
             <span className="v" style={{ color: 'var(--bl-terra)' }}>
-              − {fmt(order.discount_total)}
+              − {fmt(order.discount_total - (order.points_discount ?? 0))}
+            </span>
+          </div>
+        ) : null}
+        {/* Loyalty points spent at the shop's till, apart from the promotion. */}
+        {order.points_discount > 0 ? (
+          <div className="bl-row">
+            <span className="k">Points ({order.points_used})</span>
+            <span className="v" style={{ color: 'var(--bl-terra)' }}>
+              − {fmt(order.points_discount)}
             </span>
           </div>
         ) : null}
@@ -227,6 +236,13 @@ export default function OrderRoute() {
           <span>Total</span>
           <span className="v">{fmt(order.total)}</span>
         </div>
+        {/* What the order credited to the buyer's phone, once paid. */}
+        {order.points_earned > 0 ? (
+          <div className="bl-row">
+            <span className="k">Points earned</span>
+            <span className="v">+{order.points_earned}</span>
+          </div>
+        ) : null}
         {order.awb ? (
           <div style={{ marginTop: 14, fontSize: 13.5, background: 'var(--bl-cream)', borderRadius: 10, padding: '10px 14px' }}>
             Tracking number <b style={{ fontVariantNumeric: 'tabular-nums' }}>{order.awb}</b> · {String(order.courier_code || '').toUpperCase()}
