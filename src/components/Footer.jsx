@@ -9,7 +9,10 @@ const heading = { fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTra
 const chip = { display: 'inline-flex', alignItems: 'center', minHeight: 30, border: '1px solid var(--bl-line)', borderRadius: 8, padding: '6px 11px', fontSize: 12, color: 'var(--bl-muted)' };
 
 export default function Footer() {
-  const { brand, couriers, paymentMethods } = useConfig();
+  const { brand, couriers, paymentMethods, tenant } = useConfig();
+  // The platform's mark, on the plans that carry it. Absent on an older API
+  // version, which strips the field, so nothing is drawn.
+  const badge = tenant?.sepetak_badge === true;
   const { data: cats } = useCategories();
 
   return (
@@ -86,7 +89,14 @@ export default function Footer() {
             color: 'var(--bl-faint)',
           }}
         >
-          <span>{brand.copyright}</span>
+          <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+            {brand.copyright && <span>{brand.copyright}</span>}
+            {badge && (
+              <a href="https://sepetak.com/?ref=toko" target="_blank" rel="noopener" style={{ fontSize: 12, color: 'var(--bl-faint)', whiteSpace: 'nowrap' }}>
+                Dibuat dengan Sepetak
+              </a>
+            )}
+          </span>
           <Link to="/lacak" style={{ color: 'var(--bl-faint)' }}>
             Track order
           </Link>
