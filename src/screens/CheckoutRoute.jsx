@@ -14,7 +14,7 @@ import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { createDraft, sendCheckoutCode, verifyCheckoutCode } from '@sepetakhq/storefront-kit/api/endpoints';
 import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
 import { lineKey } from '@sepetakhq/storefront-kit/lib/variants';
-import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import { confirmStep, estimatePaymentFee, estimateShipping, methodFits, storeNotReady } from '@sepetakhq/storefront-kit/lib/checkout';
 import { CHANNEL_WHATSAPP, normalizeContact, normalizePhone } from '@sepetakhq/storefront-kit/lib/contact';
 import { destinationSummary } from '@sepetakhq/storefront-kit/lib/shipping';
@@ -468,7 +468,7 @@ function Checkout({ onPlaced }) {
                 <div key={l.key} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <Img src={l.product.image} srcSet={l.product.image_srcset} sizes={SIZES.summaryLine} alt="" ratio="1/1" radius={8} style={{ width: 44, flex: 'none' }} />
                   <div style={{ flex: 1, fontSize: 12.5, lineHeight: 1.35 }}>
-                    <span style={{ fontWeight: 700 }}>{l.item.qty}×</span> {l.product.name}
+                    <span style={{ fontWeight: 700 }}>{formatQty(l.item.qty, l.limits?.unit)}×</span> {l.product.name}
                     {l.label ? <span className="bl-muted"> · {l.label}</span> : null}
                   </div>
                   <div style={{ fontSize: 12.5, fontWeight: 700 }}>{fmt(l.lineTotal)}</div>
@@ -558,7 +558,7 @@ function Review({ draft, cartPrices, courier, method, contactNoun, error, otp, o
                     <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{l.name}</div>
                     {l.variant_label ? <div style={{ fontSize: 12.5, marginTop: 2 }}>{l.variant_label}</div> : null}
                     <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 3 }}>
-                      {l.qty} × {fmt(l.unit_price)}
+                      {formatQty(l.qty, l.unit)} × {fmt(l.unit_price)}
                       {l.promotion_name ? <span style={{ color: 'var(--bl-terra)', fontWeight: 700 }}> · {l.promotion_name}</span> : null}
                     </div>
                     {l.preorder ? <div className="bl-muted" style={{ fontSize: 12, marginTop: 2 }}>Pre-order · made after payment</div> : null}

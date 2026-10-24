@@ -2,9 +2,10 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { Img, SIZES } from '../ui/Img.jsx';
 import { EmptyState, InlineError, Skeleton } from '../ui/states.jsx';
-import { useCart, MAX_QTY } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
+import { isScaled, stepQty } from '@sepetakhq/storefront-kit/shared/qty';
 import { useCartLines } from '@sepetakhq/storefront-kit/cart/useCartLines';
-import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import { VARIANT_GONE, blockerNotice, cartLineNote, orderNote } from '../lib/copy.js';
 
 const TONE = { green: 'var(--bl-green)', gold: 'var(--bl-gold)', terra: 'var(--bl-terra-dark)', muted: 'var(--bl-muted)' };
@@ -145,14 +146,14 @@ function CartLine({ line, onQty, onRemove }) {
         )}
         {label ? <div style={{ fontSize: 13, color: 'var(--bl-ink)', marginTop: 2 }}>{label}</div> : null}
         {product && status !== 'variant_required' ? (
-          <div style={{ fontSize: 13, color: 'var(--bl-green)', fontWeight: 700, marginTop: 4 }}>{fmt(price)} each</div>
+          <div style={{ fontSize: 13, color: 'var(--bl-green)', fontWeight: 700, marginTop: 4 }}>{fmt(price)}{isScaled(line.limits.unit) ? `/${line.limits.unit}` : ' each'}</div>
         ) : null}
         {note ? (
           <div style={{ fontSize: 12.5, marginTop: 5, color: TONE[note.tone] }}>
             {note.text}{' '}
             {status === 'overstock' ? (
               <button type="button" onClick={() => onQty(key, available)} className="bl-link" style={{ fontSize: 12.5, textDecoration: 'underline' }}>
-                Adjust to {available}
+                Adjust to {formatQty(available, line.limits.unit)}
               </button>
             ) : null}
           </div>
@@ -161,22 +162,22 @@ function CartLine({ line, onQty, onRemove }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
         {!dimmed ? (
           <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--bl-line)', borderRadius: 999 }}>
-            <button type="button" aria-label="Decrease quantity" disabled={item.qty <= 1} onClick={() => onQty(key, item.qty - 1)} style={qtyButton}>
+            <button type="button" aria-label="Decrease quantity" onClick={() => { const n = stepQty(item.qty, -1, line.limits); return n === 0 ? remove() : onQty(key, n); }} style={qtyButton}>
               −
             </button>
-            <span style={{ minWidth: 22, textAlign: 'center', fontWeight: 700, fontSize: 14 }}>{item.qty}</span>
+            <span style={{ minWidth: 22, textAlign: 'center', fontWeight: 700, fontSize: 14 }}>{formatQty(item.qty, line.limits.unit)}</span>
             <button
               type="button"
               aria-label="Increase quantity"
-              disabled={item.qty >= Math.min(MAX_QTY, available)}
-              onClick={() => onQty(key, item.qty + 1)}
+              disabled={stepQty(item.qty, 1, line.limits) > Math.min(line.limits.max, available)}
+              onClick={() => onQty(key, stepQty(item.qty, 1, line.limits))}
               style={qtyButton}
             >
               +
             </button>
           </div>
         ) : null}
-        {product && !dimmed ? <div style={{ fontWeight: 800, fontSize: 14.5, minWidth: 92, textAlign: 'right' }}>{fmt(price * item.qty)}</div> : null}
+        {product && !dimmed ? <div style={{ fontWeight: 800, fontSize: 14.5, minWidth: 92, textAlign: 'right' }}>{fmt(line.lineTotal)}</div> : null}
         <button type="button" onClick={remove} title="Remove" aria-label={`Remove ${name}`} style={{ color: 'var(--bl-faint)', fontSize: 20, padding: 4 }}>
           ×
         </button>

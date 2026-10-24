@@ -56,3 +56,16 @@ describe('OrderRoute: loyalty points', () => {
     expect(screen.queryByText(/Poin|Points/)).toBeNull();
   });
 });
+
+describe('OrderRoute: sale units', () => {
+  it('prints a weighed line in kg and a piece line as a number', () => {
+    draw({
+      lines: [
+        { id: 'l1', name: 'Linen', unit: 'kg', unit_price: 80000, qty: 1250, line_total: 100000 },
+        { id: 'l2', name: 'Throw', unit_price: 79000, qty: 2, line_total: 158000 },
+      ],
+    });
+    expect(screen.getByText('1,25 kg × Rp 80.000')).toBeTruthy();
+    expect(screen.getByText('2 × Rp 79.000')).toBeTruthy();
+  });
+});

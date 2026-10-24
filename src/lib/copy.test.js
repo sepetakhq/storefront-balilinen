@@ -64,6 +64,14 @@ describe('stock copy', () => {
     expect(stockNote(null)).toBeNull();
   });
 
+  // Stock counts grams for a kg product; "few" is under 10 kg.
+  it('quotes weighed stock in its unit', () => {
+    expect(stockNote({ unit: 'kg', stock: 2500 }).text).toBe('Only 2,5 kg left — don’t miss out');
+    expect(stockNote({ unit: 'kg', stock: 12000 }).text).toBe('In stock (12 kg)');
+    expect(cartLineNote('overstock', { unit: 'kg' }, 1500).text).toBe('Only 1,5 kg left.');
+    expect(cartLineNote('overstock', {}, 3).text).toBe('Only 3 left.');
+  });
+
   // Not counted: buyable at any number, so the number is never quoted and
   // the line never turns terra. The shipping promise still rides along.
   it('says in stock for an unlimited product, whatever the counter reads', () => {
