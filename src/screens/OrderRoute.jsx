@@ -10,7 +10,7 @@ import { CheckIcon } from '../components/icons.jsx';
 import { useOrder } from '@sepetakhq/storefront-kit/hooks/queries';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { serverNow } from '@sepetakhq/storefront-kit/api/client';
-import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import { claimPayment, reopenPayment } from '@sepetakhq/storefront-kit/api/endpoints';
 import { qk } from '@sepetakhq/storefront-kit/api/queryKeys';
 import {
@@ -178,7 +178,7 @@ export default function OrderRoute() {
                 <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{l.name}</div>
                 {l.variant_label ? <div style={{ fontSize: 12.5, marginTop: 2 }}>{l.variant_label}</div> : null}
                 <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 3 }}>
-                  {l.qty} × {fmt(l.unit_price)}
+                  {formatQty(l.qty, l.unit)} × {fmt(l.unit_price)}
                   {l.preorder ? ' · Pre-order' : ''}
                 </div>
               </div>

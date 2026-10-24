@@ -9,7 +9,7 @@ import { extractToken, forgetOrder, listOrders } from '@sepetakhq/storefront-kit
 import { deviceRows, tokensOf } from '@sepetakhq/storefront-kit/lib/deviceOrders';
 import { useOrdersByToken } from '@sepetakhq/storefront-kit/hooks/queries';
 import { recordRetryAfter, recordSend, cooldown } from '@sepetakhq/storefront-kit/checkout/otpCooldown';
-import { fmt } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import { CountdownWords } from '../ui/Countdown.jsx';
 import { contactField, fmtDate, OTP_INVALID, validateContact } from '../lib/copy.js';
 
@@ -248,7 +248,7 @@ function LookupResults({ orders }) {
             </span>
           </div>
           <div className="bl-muted" style={{ fontSize: 12.5, marginTop: 6 }}>
-            {(o.lines ?? []).map((l) => `${l.name}${l.variant_label ? ` (${l.variant_label})` : ''} ×${l.qty}`).join(', ')}
+            {(o.lines ?? []).map((l) => `${l.name}${l.variant_label ? ` (${l.variant_label})` : ''} ×${formatQty(l.qty, l.unit)}`).join(', ')}
           </div>
           {o.awb ? (
             <div style={{ fontSize: 13, marginTop: 6 }}>

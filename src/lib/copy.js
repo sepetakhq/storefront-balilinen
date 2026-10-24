@@ -22,6 +22,8 @@ import {
   SOLD_OUT,
 } from '@sepetakhq/storefront-kit/lib/availability';
 import { leadDays } from '@sepetakhq/storefront-kit/lib/preorder';
+import { qtyLimits, qtyText } from '@sepetakhq/storefront-kit/shared/qty';
+import { formatQty } from '@sepetakhq/storefront-kit/shared/format';
 import {
   CHANNEL_WHATSAPP,
   normalizeContact,
@@ -126,11 +128,13 @@ export function stockNote(product, originCity, sections) {
       tone: 'green',
     };
   }
+  // Stock is in small units (grams for kg); "few" is under 10 sale units.
   const stock = product.stock ?? 0;
+  const { unit, scale } = qtyLimits(product);
   if (stock <= 0) return { text: 'Out of stock — restocking soon', tone: 'terra' };
-  if (stock < 10) return { text: `Only ${stock} left — don’t miss out`, tone: 'gold' };
+  if (stock < 10 * scale) return { text: `Only ${formatQty(stock, unit)} left — don’t miss out`, tone: 'gold' };
   return {
-    text: `In stock (${stock} pcs)${from}`,
+    text: `In stock (${qtyText(stock, unit)})${from}`,
     tone: 'green',
   };
 }
@@ -168,7 +172,7 @@ export function cartLineNote(status, product, available) {
     case 'variant_required':
       return { text: 'This product now comes in variants. Pick one, then remove this line.', tone: 'gold' };
     case 'overstock':
-      return { text: `Only ${available} left.`, tone: 'gold' };
+      return { text: `Only ${formatQty(available, product?.unit)} left.`, tone: 'gold' };
     default: {
       const s = shortNote(product);
       return s ? { text: s, tone: 'green' } : null;

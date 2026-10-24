@@ -8,10 +8,11 @@ import { EmptyState, ErrorState, Skeleton } from '../ui/states.jsx';
 import { useProduct } from '@sepetakhq/storefront-kit/hooks/queries';
 import { useCart } from '@sepetakhq/storefront-kit/cart/CartProvider';
 import { isSoldOut, leadDays, maxQty } from '@sepetakhq/storefront-kit/lib/preorder';
+import { isScaled, qtyLimits, stepQty } from '@sepetakhq/storefront-kit/shared/qty';
 import { isImminent, isScheduled, msUntilOpen } from '@sepetakhq/storefront-kit/lib/availability';
 import { useConfig } from '@sepetakhq/storefront-kit/config/ConfigProvider';
 import { useToast } from '@sepetakhq/storefront-kit/ui/ToastProvider';
-import { fmt, fmtClock, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
+import { fmt, fmtClock, formatQty, lineAmount, paragraphs } from '@sepetakhq/storefront-kit/shared/format';
 import { CHOOSE_VARIANT, FROM, askLink, buyLabel, chooseAxis, overlayLabel, pillState, sectionText, stockNote, windowNote } from '../lib/copy.js';
 import {
   availableValues,
@@ -86,7 +87,8 @@ function ProductView({ product, onOpen }) {
   const navigate = useNavigate();
 
   const [active, setActive] = useState(0);
-  const [qty, setQty] = useState(1);
+  const limits = qtyLimits(product);
+  const [qty, setQty] = useState(limits.min);
   const [openTab, setOpenTab] = useState('desc');
   const [broken, setBroken] = useState(() => new Set());
 
@@ -100,7 +102,7 @@ function ProductView({ product, onOpen }) {
   const pick = (axis, value) => {
     setSelected((cur) => select(product, cur, axis, value));
     setActive(0);
-    setQty(1);
+    setQty(limits.min);
   };
 
   const all = product.images?.length ? product.images : [{ url: product.image, srcset: product.image_srcset, alt: product.name }];
@@ -210,6 +212,7 @@ function ProductView({ product, onOpen }) {
             {sellable.on_sale ? <span style={{ fontSize: 16, color: 'var(--bl-faint)', textDecoration: 'line-through' }}>{fmt(sellable.compare_at_price)}</span> : null}
             <span style={{ fontSize: 27, fontWeight: 800, color: 'var(--bl-green)' }}>
               {fmt(needsChoice ? product.price : sellable.price)}
+              {isScaled(limits.unit) ? <span className="bl-muted" style={{ fontSize: 15, fontWeight: 600 }}>/{limits.unit}</span> : null}
             </span>
             {sellable.on_sale && sellable.badge ? <span className="bl-badge" style={{ fontSize: 11 }}>{sellable.badge}</span> : null}
             {product.preorder ? <span className="bl-badge preorder" style={{ marginLeft: 0, fontSize: 11 }}>PRE-ORDER</span> : null}
@@ -245,16 +248,16 @@ function ProductView({ product, onOpen }) {
             ) : !blocked ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid var(--bl-line)', borderRadius: 999, background: 'var(--bl-white)' }}>
-                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label="Decrease quantity" style={stepper}>
+                  <button type="button" onClick={() => setQty((q) => Math.max(limits.min, stepQty(q, -1, limits)))} disabled={qty <= limits.min} aria-label="Decrease quantity" style={stepper}>
                     −
                   </button>
-                  <span style={{ minWidth: 26, textAlign: 'center', fontWeight: 700, fontSize: 15 }}>{qty}</span>
-                  <button type="button" onClick={() => setQty((q) => Math.min(max, q + 1))} disabled={qty >= max} aria-label="Increase quantity" style={stepper}>
+                  <span style={{ minWidth: 26, textAlign: 'center', fontWeight: 700, fontSize: 15 }}>{formatQty(qty, limits.unit)}</span>
+                  <button type="button" onClick={() => setQty((q) => Math.min(max, stepQty(q, 1, limits)))} disabled={stepQty(qty, 1, limits) > max} aria-label="Increase quantity" style={stepper}>
                     +
                   </button>
                 </div>
                 <button type="button" onClick={add} className="bl-btn primary" style={{ flex: 1, minWidth: 220, height: 48, padding: '0 28px' }}>
-                  Add to cart — {fmt(sellable.price * qty)}
+                  Add to cart — {fmt(lineAmount(sellable.price, qty, limits.unit))}
                 </button>
               </>
             ) : (
