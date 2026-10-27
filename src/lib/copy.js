@@ -23,7 +23,7 @@ import {
 } from '@sepetakhq/storefront-kit/lib/availability';
 import { leadDays } from '@sepetakhq/storefront-kit/lib/preorder';
 import { qtyLimits, qtyText } from '@sepetakhq/storefront-kit/shared/qty';
-import { formatQty } from '@sepetakhq/storefront-kit/shared/format';
+import { formatQty, fmtTime, shopZone } from '@sepetakhq/storefront-kit/shared/format';
 import {
   CHANNEL_WHATSAPP,
   normalizeContact,
@@ -32,8 +32,9 @@ import {
 
 // --- dates ------------------------------------------------------------------
 
-const DATE_FMT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const SHORT_DATE_FMT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+// Told on the shop's clock, never the phone's: the kit holds the zone
+// (ConfigProvider sets it from /storefront/config) and writes the clock,
+// adding WITA/WIT off WIB. Only the English date words are ours.
 
 function asDate(value) {
   if (!value) return null;
@@ -41,18 +42,20 @@ function asDate(value) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** "12 Sep 2026" */
-export function fmtDate(value) {
-  const d = asDate(value);
-  return d ? DATE_FMT.format(d) : '';
+function inShopZone(opts) {
+  return new Intl.DateTimeFormat('en-GB', { ...opts, timeZone: shopZone() });
 }
 
-/** "12 Sep, 14:30" -- the clock as everyone writes it, never "2.30 pm". */
+/** "12 Sep 2026" -- the shop's day. */
+export function fmtDate(value) {
+  const d = asDate(value);
+  return d ? inShopZone({ day: 'numeric', month: 'short', year: 'numeric' }).format(d) : '';
+}
+
+/** "12 Sep, 14:30", "12 Sep, 14:30 WITA" off WIB -- never "2.30 pm". */
 export function fmtDateTime(value) {
   const d = asDate(value);
-  if (!d) return '';
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${SHORT_DATE_FMT.format(d)}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return d ? `${inShopZone({ day: 'numeric', month: 'short' }).format(d)}, ${fmtTime(d)}` : '';
 }
 
 // --- availability -----------------------------------------------------------

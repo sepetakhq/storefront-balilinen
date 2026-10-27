@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   askLink,
@@ -11,6 +11,7 @@ import {
   pillState,
   buyLabel,
   cartLineNote,
+  fmtDate,
   fmtDateTime,
   listPhrase,
   orderNote,
@@ -26,6 +27,7 @@ import {
   windowNote,
 } from './copy.js';
 import { orderMessage } from '@sepetakhq/storefront-kit/lib/whatsapp';
+import { setShopZone } from '@sepetakhq/storefront-kit/shared/format';
 
 describe('availability copy', () => {
   it('names each closed state the way the card overlay does', () => {
@@ -145,8 +147,39 @@ describe('order copy', () => {
   });
 
   it('formats the clock with a colon, never a dot', () => {
-    expect(fmtDateTime(new Date(2026, 8, 12, 14, 5))).toBe('12 Sept, 14:05');
+    expect(fmtDateTime('2026-09-12T07:05:00Z')).toBe('12 Sept, 14:05');
     expect(fmtDateTime('garbage')).toBe('');
+  });
+});
+
+describe('shop time zone', () => {
+  // 16:30 UTC is 23:30 WIB, already the 13th in WITA.
+  const late = '2026-09-12T16:30:00Z';
+  const deviceTZ = process.env.TZ;
+  afterEach(() => {
+    setShopZone(undefined);
+    if (deviceTZ === undefined) delete process.env.TZ;
+    else process.env.TZ = deviceTZ;
+  });
+
+  it('reads a WIB shop exactly as before, with no label', () => {
+    setShopZone('Asia/Jakarta');
+    expect(fmtDateTime(late)).toBe('12 Sept, 23:30');
+    expect(fmtDate(late)).toBe('12 Sept 2026');
+  });
+
+  it('tells a WITA shop its own day and labels the clock', () => {
+    setShopZone('Asia/Makassar');
+    expect(fmtDateTime(late)).toBe('13 Sept, 00:30 WITA');
+    expect(fmtDate(late)).toBe('13 Sept 2026');
+    expect(windowNote({ availability: 'scheduled', sell_from: '2099-01-01T01:00:00Z' }).text).toBe('Opens 1 Jan, 09:00 WITA');
+  });
+
+  it('ignores the phone’s zone', () => {
+    process.env.TZ = 'America/New_York';
+    expect(new Date(late).getHours()).toBe(12);
+    expect(fmtDateTime(late)).toBe('12 Sept, 23:30');
+    expect(fmtDate(late)).toBe('12 Sept 2026');
   });
 });
 
