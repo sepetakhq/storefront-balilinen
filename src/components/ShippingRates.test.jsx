@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -16,7 +16,10 @@ vi.mock('@sepetakhq/storefront-kit/api/endpoints', () => ({
   }),
 }));
 
-const { default: ShippingRates, RateProblem } = await import('./ShippingRates.jsx');
+// The rate list reads the shop's config; GoSend/Grab off keeps it to the list.
+vi.mock('@sepetakhq/storefront-kit/config/ConfigProvider', () => ({ useConfig: () => ({ instantShipping: false }) }));
+
+const { default: ShippingRates, GroupRow, PinLine, RateProblem } = await import('./ShippingRates.jsx');
 
 afterEach(cleanup);
 
@@ -51,5 +54,48 @@ describe('ShippingRates', () => {
     expect(img.getAttribute('src')).toBe(JNE);
     expect(img.getAttribute('alt')).toBe('');
     expect(screen.getByText(/Kurir Toko/).closest('button').querySelector('img')).toBeNull();
+  });
+});
+
+
+// Delivery type first, the courier second (Tokopedia's "Pilih Durasi").
+describe('GroupRow', () => {
+  const g = { key: 'regular', label: 'Reguler', eta: '', options: [{}], from: 9000 };
+
+  it('names the type and its cheapest price, and opens on tap', () => {
+    const onClick = vi.fn();
+    render(<GroupRow group={g} onClick={onClick} />);
+    const row = screen.getByRole('button', { name: /Reguler/ });
+    expect(row.textContent).toMatch(/mulai Rp\s?9\.000/);
+    expect(row.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(row);
+    expect(onClick).toHaveBeenCalled();
+  });
+
+  it('says Gratis under free shipping', () => {
+    render(<GroupRow group={g} free />);
+    expect(screen.getByRole('button').textContent).toMatch(/Gratis/);
+  });
+
+  it('asks for a pin before Instan can be priced', () => {
+    render(<GroupRow group={{ key: 'instant', label: 'Instan', eta: '1–3 jam', options: [], from: null }} needsPin />);
+    expect(screen.getByRole('button').textContent).toMatch(/Pilih titik di peta/);
+  });
+});
+
+describe('PinLine', () => {
+  it('offers to move the pin, and says when nothing reaches it', () => {
+    const onEdit = vi.fn();
+    render(<PinLine none onEdit={onEdit} />);
+    expect(screen.getByText(/tidak tersedia untuk titik ini/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Ubah titik' }));
+    expect(onEdit).toHaveBeenCalled();
+  });
+});
+
+describe('GroupRow when nothing reaches the pin', () => {
+  it('says Tidak tersedia on the row itself', () => {
+    render(<GroupRow group={{ key: 'instant', label: 'Instan', eta: '1–3 jam', options: [], from: null }} unavailable />);
+    expect(screen.getByRole('button').textContent).toMatch(/Tidak tersedia/);
   });
 });
